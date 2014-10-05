@@ -74,13 +74,6 @@ module Teletype {A : Set}(`TT `getChar `putChar : A)(I : Set) where
 \end{code}
 
 \begin{code}
- evalAlg : ∀ {A} → TeletypeF ⋆ A alg> IO ∘ A
- evalAlg i (« « t , f      ) = getCh   IO.>>= ↓_ ∘ f
- evalAlg i (« » t , c , ↑ x) = putCh c IO.>>= λ _ → x
- evalAlg i (» _   , x , _  ) = IO.return x
-\end{code}
-
-\begin{code}
 module FileSystem {A : Set}(`FS `openFile `readFile `closeFile : A) where
 \end{code}
 
@@ -125,17 +118,6 @@ module FileSystem {A : Set}(`FS `openFile `readFile `closeFile : A) where
 
  closeFile : ∀ {F}⦃ p : CloseFileF <: F ⦄ → F ⊢ Open ↓ ≡ Closed
  closeFile = =>✶ (_ , ↑ return <>)
-\end{code}
-
-\begin{code}
- evalAlg : {A : Set} → FileSystemF ⋆ [[ A ]] alg> [[ IO A ]]
- evalAlg Closed (« « « _ , fn , f) = openFi fn IO.>>= ↓_ ∘ f
- evalAlg Open   (« « « _ , () , f)
- evalAlg Closed (« « » _ , () , _)
- evalAlg Open   (« « » _ , f     ) = readFi  IO.>>= ↓_ ∘ f ∘ ¡
- evalAlg Closed (« » _   , () , _)
- evalAlg Open   (« » _   , m     ) = closeFi IO.>>= λ _ → ↓ m
- evalAlg _      (» _     , a , _ ) = IO.return a
 \end{code}
 
 \begin{code}
