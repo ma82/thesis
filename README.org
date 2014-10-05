@@ -1,0 +1,9 @@
+#+TITLE: (Code from) MSc thesis - branch =agda-head-compat-unlit=
+
+This is the branch where
+
+- =.lagda= files are de-literated
+- all other files are removed
+- I am attempting to be compatible with current Agda HEAD
+
+2014 Matteo Acerbi
