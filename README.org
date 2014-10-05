@@ -1,4 +1,4 @@
-#+TITLE: (Code from) MSc thesis - branch =agda-head-compat-unlit=
+#+TITLE: (Code from) MSc thesis
 
 This is the branch where
 
