@@ -121,21 +121,21 @@ module Prog {I A : Set}(`PUSH `+++ `<> `ADD : A)
 \end{code}
 
 \begin{code}
- PUSH : ∀ {F}⦃ p : Push <: F ⦄{bs t} → Ty t → μ F (bs , t ∷ bs)
- PUSH n = => $ _ , (<> , n) , _
+ PUSH : ∀ {F}⦃ p : Instance (Push <: F) ⦄{bs t} → Ty t → μ F (bs , t ∷ bs)
+ PUSH n = => ⦃ km-<: ⦄ $ _ , (<> , n) , _
 
  infixr 5 _+++_
 
- _+++_ : ∀ {F}⦃ p : Append <: F ⦄{as bs cs} →
+ _+++_ : ∀ {F}⦃ p : Instance (Append <: F) ⦄{as bs cs} →
          μ F (as , bs) → μ F (bs , cs) → μ F (as , cs)
- p1 +++ p2 = => $ _ , _ , ↑ p1 , ↑ p2
+ _+++_ p1 p2 = => ⦃ km-<: ⦄ $ _ , _ , ↑ p1 , ↑ p2
 
- <-> : ∀ {F}⦃ p : Nil <: F ⦄{ss} → μ F (ss , ss)
- <-> = => $ _ , <> , _
+ <-> : ∀ {F}⦃ p : Instance (Nil <: F) ⦄{ss} → μ F (ss , ss)
+ <-> = => ⦃ km-<: ⦄ $ _ , <> , _
 
- ADD : ∀ {F}⦃ p : Add <: F ⦄{t t1 t2 ts}⦃ q : addTy? t1 t2 ≡ ¡ t ⦄ →
+ ADD : ∀ {F}⦃ p : Instance (Add <: F) ⦄{t t1 t2 ts}⦃ q : addTy? t1 t2 ≡ ¡ t ⦄ →
        μ F $ t1 ∷ t2 ∷ ts , t ∷ ts
- ADD ⦃ q = q ⦄ = => $ _ , (<> , q) , _
+ ADD ⦃ q = q ⦄ = => ⦃ km-<: ⦄ $ _ , (<> , q) , _
 \end{code}
 
 \begin{code}
@@ -178,8 +178,8 @@ module Val {I A : Set}(`val : A)(Ty : Set^ I Z) where
  ValF : En A I
  ValF = ¡ `val ⟩ [ `K ∘ Ty ]
 
- val : {F : En A I}⦃ p : ValF <: F ⦄ → {i : I} → Ty i → μ F i
- val v = => $ _ , v , _
+ val : {F : En A I}⦃ p : Instance (ValF <: F) ⦄ → {i : I} → Ty i → μ F i
+ val v = => ⦃ km-<: ⦄ $ _ , v , _
 \end{code}
 
 \begin{code}
@@ -196,11 +196,10 @@ module Val {I A : Set}(`val : A)(Ty : Set^ I Z) where
              where
 
   open Prog `PUSH `+++ `<> `ADD addTy? Ty _+_
-  open 8Points (smartSubs Prog) 0
+  open Instances (smartSubs Prog)
 
   compAlg : ValF alg> ∣ H ∣ (μ Prog)
-  -- TODO 9B5Q ⦃⦄s were not needed in Agda 2.4.0.2
-  compAlg i (_ , v , _) _ = _+++_ ⦃ #3 ⦄ (PUSH ⦃ #1 ⦄ v) (<-> ⦃ #5 ⦄)
+  compAlg i (_ , v , _) _ = PUSH v +++ <->
 \end{code}
 
 \begin{code}
@@ -224,12 +223,12 @@ module Plus {I A : Set}(`plus : A)
 \end{code}
 
 \begin{code}
- module _ {F}⦃ p : Plus <: F ⦄{i j k}⦃ ijk : addTy? i j ≡ ¡ k ⦄ where
+ module _ {F}⦃ p : Instance (Plus <: F) ⦄{i j k}⦃ ijk : addTy? i j ≡ ¡ k ⦄ where
 
   infixr 4 _plus_
 
   _plus_ : μ F i → μ F j → μ F k
-  x plus y = => $ _ , _ , _ , ijk , ↑ x , ↑ y
+  x plus y = => ⦃ km p ⦄ $ _ , _ , _ , ijk , ↑ x , ↑ y
 \end{code}
 
 \begin{code}
@@ -244,16 +243,10 @@ module Plus {I A : Set}(`plus : A)
  module Comp (`PUSH `+++ `<> `ADD : A) where
 
   open Prog `PUSH `+++ `<> `ADD addTy? Ty _+_
-  open 8Points (smartSubs Prog) 0
+  open Instances (smartSubs Prog)
 
   compAlg : Plus alg> ∣ H ∣ (μ Prog)
-  -- TODO 9B5Q ⦃⦄s were not needed in Agda 2.4.0.2
-  -- compAlg i (_ , _ , _ , _ , ↑ c2 , ↑ c1) is = c1 is +++ c2 _ +++ ADD
-  compAlg i (_ , _ , _ , _ , ↑ c2 , ↑ c1) is = _+++_ ⦃ #3 ⦄ (c1 is) (_+++_ ⦃ #3 ⦄ (c2 _) (ADD ⦃ #6 ⦄))
-\end{code}
-
-\begin{code}
-
+  compAlg i (_ , _ , _ , _ , ↑ c2 , ↑ c1) is = c1 is +++ (c2 _ +++ ADD)
 \end{code}
 
 \begin{code}
@@ -326,10 +319,8 @@ module Val+Plus where
 
 \begin{code}
  exp : μ (lang ExpL) `nat
- -- TODO 9B5Q ⦃⦄s were not needed in Agda 2.4.0.2
- -- exp = val 20 plus (val 8 plus val 4) where
- exp = _plus_ ⦃ #2 ⦄ (val ⦃ #1 ⦄ 20) (_plus_ ⦃ #2 ⦄ (val ⦃ #1 ⦄ 8) (val ⦃ #1 ⦄ 4)) where
-       open 8Points (smartSubs (lang ExpL)) 0
+ exp = val 20 plus val 8 plus val 4 where
+       open Instances (smartSubs (lang ExpL))
 \end{code}
 
 \begin{code}
@@ -347,9 +338,9 @@ module IfThEl {A I : Set}{`ite : A}{`bool : I} where
  IfThEl : En A I
  IfThEl = ¡ `ite ⟩ [ (λ i → `I `bool `× `I i `× `I i) ]
 
- if_th_el_ : {F : En A I}⦃ p : IfThEl <: F ⦄
+ if_th_el_ : {F : En A I}⦃ p : Instance (IfThEl <: F) ⦄
              {i : I}(b : μ F `bool)(e1 e2 : μ F i) → μ F i
- if b th e1 el e2 = => $ _ , ↑ b , ↑ e1 , ↑ e2
+ if b th e1 el e2 = => ⦃ km-<: ⦄ $ _ , ↑ b , ↑ e1 , ↑ e2
 
  module _ {Ty}⦃ p : Ty `bool ≡ Bool ⦄
           ⦃ _≟_ : ∀ {i}(x y : Ty i) → Dec (x ≡ y) ⦄ where

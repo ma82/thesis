@@ -1,9 +1,10 @@
 
 \begin{code}
-{-# OPTIONS --no-termination-check --no-positivity-check #-}
+{-# OPTIONS --no-termination-check --no-positivity-check --copatterns #-}
 module thesis.IntroMod where
 
-open import AD.Misc
+open import AD.Misc hiding (true; false)
+open import AD.Instances
 \end{code}
 
 \begin{code}
@@ -70,24 +71,27 @@ module Modular where
 \end{code}
 
 \begin{code}
- cata : ∀ {F}⦃ map : ∀ {A B} → (A → B) → F A → F B ⦄{X} → (F X → X) → μ F → X
- cata ⦃ map ⦄ α (In xs) = α (map (cata ⦃ map ⦄ α) xs)
+ Func = λ (F : Set → Set) → ∀ {A B} → (A → B) → F A → F B
+
+ cata : ∀ {F}⦃ map : Instance (Func F) ⦄{X} → (F X → X) → μ F → X
+ cata ⦃ map ⦄ α (In xs) = α (km map (cata ⦃ map ⦄ α) xs)
 \end{code}
 
 \begin{code}
- mapExpF   : ∀ {A B} → (A → B) → ExpF   A → ExpF   B
- mapTimesF : ∀ {A B} → (A → B) → TimesF A → TimesF B
- map+      : ∀ {F G} → (∀ {A B} → (A → B) → F A → F B)
-                     → (∀ {A B} → (A → B) → G A → G B)
-                     →  ∀ {A B} → (A → B) → (F :+: G) A → (F :+: G) B
+ instance
+   mapExpF   : Instance (Func ExpF)
+   mapTimesF : Instance (Func TimesF)
+   map+      : ∀ {F G}⦃ l : Instance (Func  F      ) ⦄
+                      ⦃ r : Instance (Func        G) ⦄
+                          → Instance (Func (F :+: G))
 \end{code}
 
 \begin{code}
- mapExpF f [ n   ] = [ n ]
- mapExpF f (l ⊕ r) = f l ⊕ f r
- mapTimesF f (l ⊗ r) = f l ⊗ f r
- map+ mapF mapG f (inl x) = inl (mapF f x)
- map+ mapF mapG f (inr y) = inr (mapG f y)
+   km mapExpF                  f [ n   ] = [ n ]
+   km mapExpF                  f (l ⊕ r) = f l ⊕ f r
+   km mapTimesF                f (l ⊗ r) = f l ⊗ f r
+   km (map+ ⦃ mapF ⦄ ⦃ mapG ⦄) f (inl x) = inl (km mapF f x)
+   km (map+ ⦃ mapF ⦄ ⦃ mapG ⦄) f (inr y) = inr (km mapG f y)
 \end{code}
 
 \begin{code}
@@ -98,8 +102,7 @@ module Modular where
 
 \begin{code}
  ⟦_⟧Exp : Exp → ℕ
- -- TODO 9B5Q ⦃⦄ was not needed with Agda 2.4.0.2
- ⟦_⟧Exp = cata ⦃ mapExpF ⦄ algExpF
+ ⟦_⟧Exp = cata algExpF
 \end{code}
 
 \begin{code}
@@ -107,36 +110,40 @@ module Modular where
  algTimesF (l ⊗ r) = l * r
 
  ⟦_⟧Exp' : Exp' → ℕ
- ⟦_⟧Exp' = -- TODO 9B5Q was (_ = map+ mapExpF mapTimesF) in 2.4.0.2
-           let m = map+ mapExpF mapTimesF in
-           -- TODO 9B5Q ⦃⦄ was not needed in 2.4.0.2
-           cata ⦃ m ⦄ ⊎.[ algExpF , algTimesF ]
+ ⟦_⟧Exp' = cata ⊎.[ algExpF , algTimesF ]
 \end{code}
 
 \begin{code}
- [[_]] : ∀ {F}⦃ inj : ∀ {X} → ExpF X → F X ⦄ → ℕ → μ F
- [[_]] ⦃ inj ⦄ n = In (inj [ n ])
+ infix 3 _:<:_
+ _:<:_ = λ (F G : Set → Set) → Instance (F ⇛ G)
 
- _[⊕]_ : ∀ {F}⦃ inj : ∀ {X} → ExpF X → F X ⦄ → μ F → μ F → μ F
- _[⊕]_ ⦃ inj ⦄ e1 e2 = In (inj (e1 ⊕ e2))
-
- _[⊗]_ : ∀ {F}⦃ inj : ∀ {X} → TimesF X → F X ⦄ → μ F → μ F → μ F
- _[⊗]_ ⦃ inj ⦄ e1 e2 = In (inj (e1 ⊗ e2))
+ instance
+  injId : ∀ {F}                    → F :<: F      
+  injL  : ∀ {F L R}⦃ p : F :<: L ⦄ → F :<: L :+: R
+  injR  : ∀ {F L R}⦃ q : F :<: R ⦄ → F :<: L :+: R
+  km injId        _ x = x
+  km (injL ⦃ p ⦄) _ x = inl (km p _ x)
+  km (injR ⦃ p ⦄) _ x = inr (km p _ x)
 \end{code}
 
 \begin{code}
- -- TODO 9B5Q worked in 2.4.0.2
+ [[_]] : ∀ {F}⦃ inj : ExpF :<: F ⦄ → ℕ → μ F
+ [[_]] ⦃ inj ⦄ n = In (km inj _ [ n ])
+
+ infix 3 _[⊕]_
+
+ _[⊕]_ : ∀ {F}⦃ inj : ExpF :<: F ⦄ → μ F → μ F → μ F
+ _[⊕]_ ⦃ inj ⦄ e1 e2 = In (km inj _ (e1 ⊕ e2))
+
+ infix 4 _[⊗]_
+
+ _[⊗]_ : ∀ {F}⦃ inj : TimesF :<: F ⦄ → μ F → μ F → μ F
+ _[⊗]_ ⦃ inj ⦄ e1 e2 = In (km inj _ (e1 ⊗ e2))
+\end{code}
+
+\begin{code}
  example : Exp'
- example = TODO -- ([[ 1 ]] [⊕] [[ 2 ]]) [⊗] [[ 3 ]]
-\end{code}
-
-\begin{code}
-  where
-   open import thesis.TODO
-   -- TODO 9B5Q `instance` is not enough
-   instance
-    a : ∀ {X} → ExpF   X → (ExpF :+: TimesF) X ; a = inl
-    b : ∀ {X} → TimesF X → (ExpF :+: TimesF) X ; b = inr
+ example = [[ 1 ]] [⊕] [[ 2 ]] [⊗] [[ 3 ]]
 \end{code}
 
 \begin{code}

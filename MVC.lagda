@@ -62,7 +62,7 @@ record MVC {O N : Set lI}{DSo : Set^ N lI}{DTa : Set^ O lI}
          (γ : G alg> _) → compAlg <:alg[ p ] γ →
          let module G = Cata {F = G} in
          let P = uc λ n x → G.cata β n x ℝ ∣ H ∣map exec _ (G.cata γ _ x) in
-         ∀ xs → let n , xs = xs in
+         ∀ n,xs → let n , xs = n,xs in
          □/ SoF P (n , xs) →
 \end{code}
 

@@ -3,6 +3,7 @@
 module thesis.Eff where
 
 open import AD
+
 open import thesis.Codes
 open import thesis.Sub; open Kit
 open import thesis.FreeMonad
@@ -66,11 +67,11 @@ module Teletype {A : Set}(`TT `getChar `putChar : A)(I : Set) where
 \end{code}
 
 \begin{code}
- getChar : ∀ {F} → ⦃ _ : GetCharF <: F ⦄ → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ Char ]])
- getChar = =>✶ (_ , λ c → ↑return (<> , c))
+ getChar : ∀ {F} → ⦃ _ : Instance (GetCharF <: F) ⦄ → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ Char ]])
+ getChar = =>✶ ⦃ km-<: ⦄ (_ , λ c → ↑return (<> , c))
 
- putChar : ∀ {F} → ⦃ _ : PutCharF <: F ⦄ → Char → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ ⊤ ]])
- putChar c = =>✶ (_ , c , ↑return (<> , _))
+ putChar : ∀ {F} → ⦃ _ : Instance (PutCharF <: F) ⦄ → Char → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ ⊤ ]])
+ putChar c = =>✶ ⦃ km-<: ⦄ (_ , c , ↑return (<> , _))
 \end{code}
 
 \begin{code}
@@ -109,74 +110,72 @@ module FileSystem {A : Set}(`FS `openFile `readFile `closeFile : A) where
 \end{code}
 
 \begin{code}
- openFile : ∀ {F}⦃ p : OpenFileF <: F ⦄ → FilePath → F ⊢ Closed ↓ [[ ⊤ ]]
- openFile path = =>✶ (_ , path , λ _ → ↑return tt)
+ openFile : ∀ {F}⦃ p : Instance (OpenFileF <: F) ⦄ → FilePath → F ⊢ Closed ↓ [[ ⊤ ]]
+ openFile path = =>✶ ⦃ km-<: ⦄ (_ , path , λ _ → ↑return tt)
 
- readFile : ∀ {F}⦃ p : ReadFileF <: F ⦄ → F ⊢ Open ↓ [κ String := Open ] ⊎/ ≡ Closed
- readFile ⦃ p ⦄ = =>✶ ⦃ p ⦄ (_ , λ { (¡ x) → ↑return (inl (<> , x))
-                                   ;    ε  → ↑return (inr  <>     ) })
+ readFile : ∀ {F}⦃ p : Instance (ReadFileF <: F) ⦄ → F ⊢ Open ↓ [κ String := Open ] ⊎/ ≡ Closed
+ readFile = =>✶ ⦃ km-<: ⦄ (_ , λ { (¡ x) → ↑return (inl (<> , x))
+                                 ;    ε  → ↑return (inr  <>     ) })
 
- closeFile : ∀ {F}⦃ p : CloseFileF <: F ⦄ → F ⊢ Open ↓ ≡ Closed
- closeFile = =>✶ (_ , ↑ return <>)
+ closeFile : ∀ {F}⦃ p : Instance (CloseFileF <: F) ⦄ → F ⊢ Open ↓ ≡ Closed
+ closeFile = =>✶ ⦃ km-<: ⦄ (_ , ↑ return <>)
 \end{code}
 
 \begin{code}
  module Example {F}⦃ p : FileSystemF <: F ⦄ where
 
-  -- TODO 9B5Q ⦃⦄ was not needed in Agda 2.4.0.2
-  open 16Points (smartSubs<: p) 0 public
+  -- TODO. Report possible bug. If one adds "public", you get double
+  --       candidates for instance arguments in `Cat` below!  However,
+  --       as Example is never opened, I don't think this should
+  --       happen...
+
+  open Instances (smartSubs<: p) -- public
 
   example : F ⊢ Closed ↓ [κ String := Closed ]
-  -- TODO 9B5Q ⦃⦄ was not needed in Agda 2.4.0.2
-  example = openFile ⦃ #2 ⦄ "test.txt" >>
-            λ { Closed → return (<> , "Error while opening.")
-              -- TODO 9B5Q ⦃⦄ was not needed in Agda 2.4.0.2
-              ; Open   → readFile ⦃ #3 ⦄ >>= postRead  }
+  example = openFile "test.txt" >> λ
+            { Closed → return (<> , "Error while opening.")
+            ; Open   → readFile >>= postRead }
     where
       postRead : [κ String := Open ] ⊎/ ≡ Closed ⇛ _
-      -- TODO 9B5Q ⦃⦄ was not needed in Agda 2.4.0.2
-      postRead .Open  (inl (<> , contents)) = closeFile ⦃ #4 ⦄ >>= λ { ._ <> →
+      postRead .Open  (inl (<> , contents)) = closeFile >>= λ { ._ <> →
                                               return (<> , contents) }
       postRead Closed (inr              <>) = return (<> , "Error while reading.")
 \end{code}
 
 \begin{code}
-module Cat {A : Set}
-           (`TT `getChar  `putChar             : A) 
-           (`FS `openFile `readFile `closeFile : A)
+module Cat {A : Set}(`TT `getChar  `putChar             : A) 
+                    (`FS `openFile `readFile `closeFile : A)
+           (let open FileSystem `FS `openFile `readFile `closeFile)
+           (let open Teletype   `TT `getChar  `putChar  State)
+           {F} ⦃ p : FileSystemF <: F ⦄ ⦃ q : PutCharF <: F ⦄
            where
-
- open module F = FileSystem `FS `openFile `readFile `closeFile
- open module T = Teletype   `TT `getChar  `putChar  State
 \end{code}
 
 \begin{code}
- cat : ∀ {F} ⦃ p : FileSystemF <: F ⦄ ⦃ q : TeletypeF <: F ⦄ → 
-       FilePath → F ⊢ Closed ↓ ≡ Closed
+  open Instances (smartSubs<: p AD.++ smartSubs<: q)
+
 \end{code}
 
 \begin{code}
- cat {F} ⦃ p ⦄ ⦃ q ⦄ fp =
-   openFile ⦃ #2 ⦄ fp >>= λ { Closed x → putChars openErrorMsg =>= λ _ →
-                                         return <>
-                            ; Open   x → readFile ⦃ #3 ⦄ >>= postRead }
-  where
+  cat : FilePath → F ⊢ Closed ↓ ≡ Closed
+  cat fp = openFile fp >>= λ { Closed x → putChars openErrorMsg =>= λ _ →
+                                          return <>
+                             ; Open   x → readFile >>= postRead }
+   where
 
-   open 16Points (smartSubs<: p List.++ smartSubs<: q) 0
+    openErrorMsg = S.toList "Error while opening the file!\n"
+    readErrorMsg = S.toList "Error while reading the file!\n"
 
-   openErrorMsg = S.toList "Error while opening the file!\n"
-   readErrorMsg = S.toList "Error while reading the file!\n"
+    putChars : List Char → F ⊢ Closed ↓ ≡ Closed ×/ [[ ⊤ ]]
+    putChars []       = return (<> , tt)
+    putChars (x ∷ xs) = putChar x =>= λ _ → putChars xs
 
-   putChars : List Char → F ⊢ Closed ↓ ≡ Closed ×/ [[ ⊤ ]]
-   putChars []       = return (<> , tt)
-   putChars (x ∷ xs) = putChar ⦃ #7 ⦄ x =>= λ _ → putChars xs
-
-   postRead : ≡ Open ×/ [[ String ]] ⊎/ ≡ Closed ⇛ F ✶ ≡ Closed
-   postRead  Closed (inl (() , _)  )
-   postRead .Closed (inr <>        ) = putChars readErrorMsg =>= λ _ →
-                                       return <>
-   postRead .Open   (inl (<> , str)) = closeFile ⦃ #4 ⦄ >>= λ { .Closed <> →
-                                       putChars (S.toList str) =>= λ _ →
-                                       return <> }
+    postRead : ≡ Open ×/ [[ String ]] ⊎/ ≡ Closed ⇛ F ✶ ≡ Closed
+    postRead  Closed (inl (() , _)  )
+    postRead .Closed (inr <>        ) = putChars readErrorMsg =>= λ _ →
+                                        return <>
+    postRead .Open   (inl (<> , str)) = closeFile >>= λ { .Closed <> →
+                                        putChars (S.toList str) =>= λ _ →
+                                        return <> }
 \end{code}
 

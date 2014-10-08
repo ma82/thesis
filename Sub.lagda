@@ -413,24 +413,14 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
+ -- TODO Try to explain why you didn't implement these the other way round... If you can!
+
  smartSubs<: : ∀ {F G} → F <: G → List ★∙
- smartSubs<: F<G = mapL (λ { (H , H<G) → _ , H<G }) (mapL (mapSub F<G) (subs _))
+ smartSubs<: F<G = mapL (Σ.map _ id ∘ mapSub F<G)
+                        (List.filter (1+.is-just ∘ name ∘ fst) (subs _))
 
  smartSubs : (F : En A I) → List ★∙
  smartSubs F = smartSubs<: {F = F} []
-\end{code}
-
-\begin{code}
- -- postulate
- --  a b : A
-
-
- -- postulate
- --  i : I
- --  x : ⟪ F ⟫ (μ H) i
-
- -- y : μ H i
- -- y = => {!#!} where open 8Points (smartSubs G) 0
 \end{code}
 
 \begin{code}
@@ -488,3 +478,9 @@ module _ {A : Set lA}{I : Set lI} where
  cata+- {G = G} w + - = Cata.cata {F = G} (+ +alg[ w ] -)
 \end{code}
 
+\begin{code}
+ open import AD.Instances
+
+ km-<: : ∀ {F G : En A I}⦃ p : Instance (F <: G) ⦄ → F <: G
+ km-<: ⦃ p ⦄ = Instance.km p
+\end{code}
