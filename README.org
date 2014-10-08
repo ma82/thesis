@@ -14,7 +14,7 @@ enhancements.
 
 * Notes
 
-- <2014-10-08 Wed> bf76763 Switched to recursive instance search
-- <2014-10-08 Wed> [[http://acerbi.works/MatteoAcerbi-TesiLaureaMagistrale.pdf][PDF]] of MSc thesis
+- 2014-10-08 Switched to recursive instance search
+- [[http://acerbi.works/MatteoAcerbi-TesiLaureaMagistrale.pdf][PDF]] of MSc thesis (2014-03-10)
 
-2014 Matteo Acerbi
+201?-2014 Matteo Acerbi
