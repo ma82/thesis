@@ -28,7 +28,7 @@ module Cata {F : En I}{lY}{Y : Set^ I lY}(α : F alg> Y) where
 
 \begin{code}
  module No where
-  {-# NO_TERMINATION_CHECK #-}
+  {-# TERMINATING #-}
 \end{code}
 
 \begin{code}
@@ -104,7 +104,7 @@ module Elim (F : En I){lP}(P : Mot F lP)(m : F me> P) where
 
 \begin{code}
  module No where
-  {-# NO_TERMINATION_CHECK #-}
+  {-# TERMINATING #-}
 \end{code}
 
 \begin{code}
