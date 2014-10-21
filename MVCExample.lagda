@@ -142,8 +142,8 @@ module Prog {I A : Set}(`PUSH `+++ `<> `ADD : A)
  open Stack Ty
 
  evalPush : Push alg> ST
- evalPush (_  ,    []) (_ , ()       , _)
  evalPush (._ , _ ∷ _) (_ , (<> , t) , _) = _,_ t
+ evalPush (_  ,    []) (_ , ()       , _)
 
  evalNil : Nil alg> ST
  evalNil _ (_ , q , _) = rew Stack q

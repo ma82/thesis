@@ -413,8 +413,6 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- -- TODO Try to explain why you didn't implement these the other way round... If you can!
-
  smartSubs<: : ∀ {F G} → F <: G → List ★∙
  smartSubs<: F<G = mapL (Σ.map _ id ∘ mapSub F<G)
                         (List.filter (1+.is-just ∘ name ∘ fst) (subs _))
