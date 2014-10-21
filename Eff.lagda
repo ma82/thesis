@@ -124,12 +124,7 @@ module FileSystem {A : Set}(`FS `openFile `readFile `closeFile : A) where
 \begin{code}
  module Example {F}⦃ p : FileSystemF <: F ⦄ where
 
-  -- TODO. Report possible bug. If one adds "public", you get double
-  --       candidates for instance arguments in `Cat` below!  However,
-  --       as Example is never opened, I don't think this should
-  --       happen...
-
-  open Instances (smartSubs<: p) -- public
+  open Instances (smartSubs<: p)
 
   example : F ⊢ Closed ↓ [κ String := Closed ]
   example = openFile "test.txt" >> λ
