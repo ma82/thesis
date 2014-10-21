@@ -8,7 +8,7 @@ enhancements.
 
 * Dependencies
 
-- https://github.com/ma82/adapter     (tested with dd10a95)
+- https://github.com/ma82/adapter     (tested with 0bebe90)
 - https://github.com/agda/agda-stdlib (tested with 3a67366)
 - https://github.com/agda/agda        (tested with dd5beb7)
 
