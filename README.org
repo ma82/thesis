@@ -1,20 +1,18 @@
-#+TITLE: MSc thesis code and its updates
+#+TITLE: Inductive families à la carte
 
-Here I started from the Agda code of my (literate Agda) thesis with
-the purpose of keeping it compatible with current Agda HEAD.
-
-The first commit gives the original code, hence I won't avoid possible
-enhancements.
+The purpose of this repository is to keep the code for my [[%5B%5Bhttp://acerbi.works/MatteoAcerbi-TesiLaureaMagistrale.pdf%5D%5BMSc%20thesis%5D%5D][MSc thesis]]
+(2014-03-10) compatible with the current development version of Agda,
+while trying out new ideas.
 
 * Dependencies
 
-- https://github.com/ma82/adapter     (tested with 0bebe90)
-- https://github.com/agda/agda-stdlib (tested with 3a67366)
-- https://github.com/agda/agda        (tested with dd5beb7)
+- https://github.com/ma82/adapter     (tested with be76ad4)
+- https://github.com/agda/agda-stdlib (tested with 8c60c6b)
+- https://github.com/agda/agda        (tested with 5ad160f)
 
-* Notes
+* News
 
+- 2014-10-30 Recovering typechecking after AIM XX
 - 2014-10-08 Switched to recursive instance search
-- [[http://acerbi.works/MatteoAcerbi-TesiLaureaMagistrale.pdf][PDF]] of MSc thesis (2014-03-10)
 
 201?-2014 Matteo Acerbi

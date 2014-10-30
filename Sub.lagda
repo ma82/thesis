@@ -8,7 +8,7 @@ import thesis.Mu as Mu
 \end{code}
 
 \begin{code}
-infixr 3 _⊕_ 
+infixr 3 _⊕_
 infix  7 _⟩_
 \end{code}
 
@@ -120,7 +120,7 @@ module Kit where
 
  module _ {A : Set lA}{O N : Set lI} where
 
-  ⟪_⟫map : ∀ (F : O [ A ]► N){lX}{X : O → Set lX}{lY}{Y : O → Set lY} → 
+  ⟪_⟫map : ∀ (F : O [ A ]► N){lX}{X : O → Set lX}{lY}{Y : O → Set lY} →
            (f : X ⇛ Y) → ⟪ F ⟫ X ⇛ ⟪ F ⟫ Y
   ⟪ F ⟫map f n = ⟦ F `$ n ⟧map f
 
@@ -146,8 +146,8 @@ module Kit where
   functor-ap : ∀ (F : O [ A ]► N) {lX} eF → FunctorAp O N lX (lX ⊔ lI)
   functor-ap F eF = mk (functor F eF) ⟪ F , eF ⟫map-cong
 
-  □/→⟪⟫ : (F : O [ A ]► N) → 
-          ∀ {lX}{X : Set^ O lX}{lY}{Y : Set^ O lY} → 
+  □/→⟪⟫ : (F : O [ A ]► N) →
+          ∀ {lX}{X : Set^ O lX}{lY}{Y : Set^ O lY} →
             □/ F {X = X} (Y ∘ fst) ⇛ ⟪ F ⟫ Y ∘ fst
   □/→⟪⟫ F (n , xs) = □→⟦⟧ (to▻ F n) xs
 \end{code}
@@ -264,7 +264,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- open _[_]►_ 
+ open _[_]►_
 \end{code}
 
 \begin{code}
@@ -285,9 +285,9 @@ module _ {A : Set lA}{I : Set lI} where
 
 \begin{code}
  <:-antisym : {F G : En A I} → F <: G → G <: F → F ≡ G
- <:-antisym []          []  = <>  
- <:-antisym []      (<[  q) = <>  
- <:-antisym []      (]>  q) = <>  
+ <:-antisym []          []  = <>
+ <:-antisym []      (<[  q) = <>
+ <:-antisym []      (]>  q) = <>
  <:-antisym (<[  p)      q  = magic (¬<:L (q <:∘ p))
  <:-antisym (]>  p)      q  = magic (¬<:R (q <:∘ p))
 \end{code}
@@ -297,18 +297,20 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- inj : ∀ {l}{F G : En A I}⦃ p : F <: G ⦄ → F pt[ l ]> G
- inj ⦃ []   ⦄ _ _ xs = xs
- inj ⦃ <[ p ⦄ _ _ xs = let t , ys = inj _ _ xs in « t , ys
- inj ⦃ ]> p ⦄ _ _ xs = let t , ys = inj _ _ xs in » t , ys
+ open import AD.Manifest; open Manifest lI; open import AD.TagTree
 
- injNat : ∀ {l}{F G : En A I}⦃ p : F <: G ⦄ → isNat F G (inj {l} ⦃ p ⦄)
- injNat ⦃ []   ⦄ f _        = <>  
- injNat ⦃ <[ p ⦄ f (i , xs) = Σ.map (λ x → « x) id $≡ injNat ⦃ p ⦄ f (, xs)
- injNat ⦃ ]> p ⦄ f (i , xs) = Σ.map (λ x → » x) id $≡ injNat ⦃ p ⦄ f (, xs)
+ inj : ∀ {F G : En A I}⦃ p : F <: G ⦄ → ∀ {l} → F pt[ l ]> G
+ inj ⦃ []   ⦄ _ _ xs = xs
+ inj ⦃ <[ p ⦄ _ _ xs = inL (snd (inj _ _ xs))
+ inj ⦃ ]> p ⦄ _ _ xs = inR (snd (inj _ _ xs))
+
+ injNat : ∀ {F G : En A I}⦃ p : F <: G ⦄ → ∀ {l} → isNat F G (inj ⦃ p ⦄ {l})
+ injNat ⦃ []   ⦄ f _        = <>
+ injNat ⦃ <[ p ⦄ f (i , xs) = nestRL ∘ ,_ $≡ injNat f (i , xs)
+ injNat ⦃ ]> p ⦄ f (i , xs) = nestRL ∘ ,_ $≡ injNat f (i , xs)
 
  inj# : ∀ {l}{F G : En A I}⦃ p : F <: G ⦄ → F nt[ l ]> G
- inj# ⦃ p ⦄ = inj ⦃ p ⦄ , injNat ⦃ p ⦄
+ inj# = inj , injNat
 \end{code}
 
 \begin{code}
@@ -338,16 +340,16 @@ module _ {A : Set lA}{I : Set lI} where
 \begin{code}
   inj≡inj∘inj : ∀ {F G H}(p : F <: G)(q : G <: H) →
                   inj ⦃ p <:∘ q ⦄ X ⇛≡ inj ⦃ q ⦄ _ ∘⇛ inj ⦃ p ⦄ _
-  inj≡inj∘inj p []      (i , xs) = <>  
-  inj≡inj∘inj p (<[  q) (i , xs) = Σ.map (λ x → « x) id $≡ inj≡inj∘inj p q (, xs)
-  inj≡inj∘inj p (]>  q) (i , xs) = Σ.map (λ x → » x) id $≡ inj≡inj∘inj p q (, xs)
+  inj≡inj∘inj p []      (i , xs) = <>
+  inj≡inj∘inj p (<[  q) (i , xs) = nestRL ∘ ,_ $≡ inj≡inj∘inj p q (, xs)
+  inj≡inj∘inj p (]>  q) (i , xs) = nestRL ∘ ,_ $≡ inj≡inj∘inj p q (, xs)
 \end{code}
 
 \begin{code}
  module _ {lX}{X : Set^ I lX}{lP}{P : Set^Σ X lP} where
 
   □inj : {F G : En A I}⦃ < : F <: G ⦄ →
-         □/ F P ⇛ □/ G P ∘ mapΣ id (inj ⦃ < ⦄ _)
+         □/ F P ⇛ □/ G P ∘ Σmap id (inj ⦃ < ⦄ _)
 \end{code}
 
 \begin{code}
@@ -361,17 +363,12 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
-  me-inj-<: : {F G H : En A I}(p : F <: G)(q : G <: H)
-              (β : (i : I)(xs : ⟪ H ⟫ X i) → □/ H (Y ∘ fst) (i , xs) → Y i) →
-              (i : I)(xs : ⟪ F ⟫ X i)(ih : □/ F (Y ∘ fst) (i , xs)) →
-                β i (inj ⦃ p <:∘ q ⦄ _ i xs) (□inj ⦃ p <:∘ q ⦄ (i , xs) ih)
-              ≡ β i (inj ⦃ q ⦄ _ i (inj ⦃ p ⦄ _ i xs))
-                    (□inj ⦃ q ⦄ (i , inj ⦃ p ⦄ _ i xs) (□inj ⦃ p ⦄ (i , xs) ih))
-  me-inj-<: p []                β i xs ih = <>
-  me-inj-<: p (<[  {L2 = L2} q) β i xs ih =
-    me-inj-<: p q (λ i xs → β i (« _ , snd xs)) i xs ih
-  me-inj-<: p (]>  {R2 = R2} q) β i xs ih =
-    me-inj-<: p q (λ i xs → β i (» _ , snd xs)) i xs ih
+  me-inj-<:-Type = {F G H : En A I}(p : F <: G)(q : G <: H)
+                   (β : (i : I)(xs : ⟪ H ⟫ X i) → □/ H (Y ∘ fst) (i , xs) → Y i) →
+                   (i : I)(xs : ⟪ F ⟫ X i)(ih : □/ F (Y ∘ fst) (i , xs)) →
+                     β i (inj ⦃ p <:∘ q ⦄ _ i xs) (□inj ⦃ p <:∘ q ⦄ (i , xs) ih)
+                   ≡ β i (inj ⦃ q ⦄ _ i (inj ⦃ p ⦄ _ i xs))
+                         (□inj ⦃ q ⦄ (i , inj ⦃ p ⦄ _ i xs) (□inj ⦃ p ⦄ (i , xs) ih))
 \end{code}
 
 \begin{code}
@@ -409,15 +406,13 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- open Pointed (lA ⊔ S lI)
-\end{code}
+ open Record★
 
-\begin{code}
- smartSubs<: : ∀ {F G} → F <: G → List ★∙
+ smartSubs<: : ∀ {F G} → F <: G → Record
  smartSubs<: F<G = mapL (Σ.map _ id ∘ mapSub F<G)
                         (List.filter (1+.is-just ∘ name ∘ fst) (subs _))
 
- smartSubs : (F : En A I) → List ★∙
+ smartSubs : (F : En A I) → Record
  smartSubs F = smartSubs<: {F = F} []
 \end{code}
 
@@ -465,20 +460,20 @@ module _ {A : Set lA}{I : Set lI} where
                F alg> Y → (< : F <: G) → (G − <) alg> Y → G alg> Y
  α +alg[ []   ] β = α
  α +alg[ <[ w ] β =
-   λ i → uc (uc ⊎.[ (λ _ → cu ((α +alg[ w ] (β ∘⇛ (λ i → uc injL))) i))
-                  , (λ _ t xs → β i (» t , xs))                         ])
+   λ i → uc (uc ⊎.[ (λ _ → cu ((α +alg[ w ] (β ∘⇛ (λ i → inL ∘ snd))) i))
+                  , (λ _ t xs → β i (inR/ t xs))                          ])
  α +alg[ ]> w ] β =
-   λ i → uc (uc ⊎.[ (λ _ t xs → β i (« t , xs))                         
-                  , (λ _ → cu ((α +alg[ w ] (β ∘⇛ (λ i → uc injR))) i)) ])
+   λ i → uc (uc ⊎.[ (λ _ t xs → β i (inL/ t xs))
+                  , (λ _ → cu ((α +alg[ w ] (β ∘⇛ (λ i → inR ∘ snd))) i)) ])
 
- cata+- : ∀ {F G : En A I}(< : F <: G){lY}{Y : Set^ I lY} → 
+ cata+- : ∀ {F G : En A I}(< : F <: G){lY}{Y : Set^ I lY} →
             (+ : F alg> Y)(- : (G − <) alg> Y) → μ G ⇛ Y
  cata+- {G = G} w + - = Cata.cata {F = G} (+ +alg[ w ] -)
 \end{code}
 
 \begin{code}
- open import AD.Instances
+ open import AD.Hints
 
- km-<: : ∀ {F G : En A I}⦃ p : Instance (F <: G) ⦄ → F <: G
- km-<: ⦃ p ⦄ = Instance.km p
+ km-<: : ∀ {F G : En A I}⦃ p : ||| F <: G ⦄ → F <: G
+ km-<: ⦃ p ⦄ = km p
 \end{code}

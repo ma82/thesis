@@ -11,6 +11,7 @@ module thesis.FreeMonad {lA}{A : Set lA}{lI}{I : Set lI} where
 open import thesis.Codes
 import thesis.Mu as Mu
 open import thesis.Sub; open Kit; open TreeCase {A = A}{O = I}{I} ε
+open Manifest lI
 \end{code}
 
 \begin{code}
@@ -27,10 +28,10 @@ F ✶ X = μ (F ⋆ X)
 
 \begin{code}
 roll : {F : En A I}{X : Set^ I lI} → F alg> F ✶ X
-roll i (t , xs) = ⟨ (« t , xs) ⟩
+roll i (t , xs) = ⟨ (inL/ t xs) ⟩
 
 var  : {F : En A I}{X : Set^ I lI} → X ⇛ F ✶ X
-var i v = ⟨ (» _ , v , _) ⟩
+var i v = ⟨ (inR/ _ (v , _)) ⟩
 \end{code}
 
 \begin{code}
@@ -60,54 +61,32 @@ open NT+
 ✶⊥→μ {F} = Mu.μhomap (✶⊥→μ-pt {F = F})
 
 μ→✶⊥-pt : {F : En A I} → F pt> F ⋆ ⊥/
-μ→✶⊥-pt X n (t , xs) = « t , xs
+μ→✶⊥-pt X n (t , xs) = inL/ t xs
 
 μ→✶⊥ : {F : En A I} → μ F ⇛ F ✶ ⊥/
 μ→✶⊥ {F} = Mu.μhomap (μ→✶⊥-pt {F = F})
 \end{code}
 
 \begin{code}
-return : ∀ {F X i} → X i → F ✶ X $ i
-return = var _
-\end{code}
+instance
 
-\begin{code}
+  rawMonad : {F : En A I} → IsRawMonad (_✶_ F)
+  rawMonad {F} = mk (var _) (cata✶ roll) where open Cata✶
+
+open IsRawMonad.API ⦃...⦄
+
 ↑return : ∀ {F X i l} → X i → ^ l (F ✶ X $ i)
-↑return = ↑_ ∘ return
+↑return x = ↑ (return _ x)
 \end{code}
 
-\begin{code}
-extend : ∀ {F A B} → (A ⇛ F ✶ B) → F ✶ A ⇛ F ✶ B
-extend = cata✶ roll
-\end{code}
+TODO Also treat these generically for indexed monads in AD.Misc (or AD.Monad?)
 
 \begin{code}
- where open Cata✶
-\end{code}
-
-\begin{code}
-_>>=_ : ∀ {F A B i} → F ✶ A $ i → (A ⇛ F ✶ B) → F ✶ B $ i
-m >>= f = extend f _ m
-\end{code}
-
-\begin{code}
-_>>_ : ∀ {F A B i} → F ✶ A $ i → (∀ i → F ✶ B $ i) → F ✶ B $ i
-m >> n = m >>= λ i _ → n i
-\end{code}
-
-\begin{code}
-_=>=_ : ∀ {F A B i j} → F ✶ [ A := j ] $ i  →
-                 (A j → F ✶ B          $ j) →
-                        F ✶ B          $ i
-m =>= f = m >>= λ { ._ (<> , a) → f a }
-\end{code}
-
-\begin{code}
-✑ : ∀ F i j (X : Set^ I lI) → Set lI
+✑ : ∀ F i j (X : Set^ I lI) → ★ lI
 ✑ F i j X = F ✶ [ X := j ] $ i
 
 ✑return : ∀ {F A i} → A i → ✑ F i i A
-✑return a = return (<> , a)
+✑return a = return _ (<> , a)
 \end{code}
 
 \begin{code}
@@ -123,18 +102,8 @@ join-alg = [ roll , fst/ ∘⇛ snd/ ]⟦⟧
 \end{code}
 
 \begin{code}
-join : ∀ {F X} → F ✶ (F ✶ X) ⇛ F ✶ X
-join = extend (λ _ → id)
-\end{code}
-
-\begin{code}
 fmap-alg : ∀ {F A B} → (A ⇛ B) → F ⋆ A alg> F ✶ B
 fmap-alg f = [ roll , var ∘⇛ f ∘⇛ fst/ ∘⇛ snd/ ]⟦⟧
-\end{code}
-
-\begin{code}
-fmap : ∀ {F A B} → (A ⇛ B) → F ✶ A ⇛ F ✶ B
-fmap f = extend (var ∘⇛ f)
 \end{code}
 
 \begin{code}
@@ -152,8 +121,8 @@ module Init✶ (F : En A I)(eF : ∀ {l} → ExtFor/ F l)
  init✶ : cata✶ α ξ ⇛≡ k
  init✶ = Init.init [ α , ξ ∘⇛ fst/ ∘⇛ snd/ ]⟦⟧
                    (λ i → uc ⊎.[ κ (eF i) , _ ]) k
-                    λ { (i , « t , ls   ) → hr (i , t , ls)
-                      ; (i , » t , x , _) → hv (i , x)      }
+                    λ { (i , inL/ t ls     ) → hr (i , t , ls)
+                      ; (i , inR/ t (x , _)) → hv (i , x)      }
 \end{code}
 
 \begin{code}
@@ -162,16 +131,16 @@ open NT+
 module _ {F G : En A I} where
 
  pt→pt⋆ : ∀ {l} → F pt[ l ]> G → ∀ {X} → F ⋆ X pt[ l ]> G ⋆ X
- pt→pt⋆ f Y i (« t , xs) = let t , xs = f Y i (t , xs) in « t , xs
- pt→pt⋆ f Y i (» t , xs) = » t , xs
+ pt→pt⋆ f Y i (inL/ t xs) = let t , xs = f Y i (t , xs) in inL/ t xs
+ pt→pt⋆ f Y i (inR/ t xs) = inR/ t xs
 
  nt→nt⋆ : ∀ {l} → F nt[ l ]> G → ∀ {X} → F ⋆ X nt[ l ]> G ⋆ X
  nt→nt⋆ (f , nat) {X} = f✶ , nat✶ where
   f✶ = pt→pt⋆ f {X}
   nat✶ : ∀ {A B}(g : A ⇛ B) →
          f✶ B ∘⇛ ⟪ F ⋆ X ⟫map g ⇛≡ ⟪ G ⋆ X ⟫map g ∘⇛ f✶ A
-  nat✶ g (i , « t , xs) = (λ ■ → « (fst ■) , snd ■) $≡ nat g (i , t , xs)
-  nat✶ g (i , » t , xs) = <>
+  nat✶ g (i , inL/ t xs) = (λ ■ → « (fst ■) , snd ■) $≡ nat g (i , t , xs)
+  nat✶ g (i , inR/ t xs) = <>
 \end{code}
 
 \begin{code}
@@ -182,7 +151,7 @@ module _ {F G : En A I} where
  inj⋆ = fst inj⋆#
 
  =>✶ : ⦃ p : F <: G ⦄{X : Set^ I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
- =>✶ (t , xs) = ⟨ inj⋆ _ _ (« t , xs) ⟩
+ =>✶ (t , xs) = ⟨ inj⋆ _ _ (inL/ t xs) ⟩
 \end{code}
 
 \begin{code}
@@ -224,19 +193,26 @@ module ✶homap-nat (F : En A I)⦃ eF : ExtFor/ F lI ⦄
  module F✶X = Cata {F = F ⋆ X}
  module F✶Y = Cata {F = F ⋆ Y}
 
+ -- no more meta solving after AIM XX
+ module F★ = RawFunctor (rawFunctor ⦃ rawMonad {F} ⦄)
+ module G★ = RawFunctor (rawFunctor ⦃ rawMonad {G} ⦄)
+
  map✶homap-nat : (D : De I)(eD : ExtFor D lI) →
                     G✶X.mapCata (fmap-alg {F = G} h) D ∘ F✶X.mapCata fX D
                  Π≡ F✶Y.mapCata fY D ∘ F✶X.mapCata (fmap-alg {F = F} h) D
+
  map✶homap-nat' : ∀ i →    G✶X.mapCata (fmap-alg {F = G} h) (G `$ i) ∘ f _ i ∘ F✶X.mapCata fX (F `$ i)
                         Π≡ f _ i ∘ F✶Y.mapCata fY (F `$ i) ∘ F✶X.mapCata (fmap-alg {F = F} h) (F `$ i)
- map✶homap-nat (`I i  ) _ (↑ ⟨ « t , xs ⟩) = (↑_ ∘ ⟨_⟩ ∘ (λ ■ → « (fst ■) , snd ■)) $≡ map✶homap-nat' i (t , xs)
- map✶homap-nat (`I i  ) _ (↑ ⟨ » t , xs ⟩) = <>
+
+ map✶homap-nat (`I i  ) _ (↑ ⟨ inL/ t xs ⟩) = ↑_ ∘ ⟨_⟩ ∘ uc inL/ $≡ map✶homap-nat' i (t , xs)
+ map✶homap-nat (`I i  ) _ (↑ ⟨ inR/ t xs ⟩) = <>
  map✶homap-nat (`Σ S T) eT (s , t) = ,_ $≡ map✶homap-nat (T s) (eT s) t
  map✶homap-nat (`Π S T) e f = e λ s → map✶homap-nat (T s) (extFor e (T s)) (f s)
  map✶homap-nat (`1    ) _ xs = <>
  map✶homap-nat (L `× R) (eL , eR) (ls , rs) = ap₂ _,_ (map✶homap-nat L eL ls) (map✶homap-nat R eR rs)
+
  map✶homap-nat' i xs = help i _ ⊚ (f _ i $≡ map✶homap-nat (F `$ i) (eF i) xs) where
-  m  = fmap {F = G} h
+  m  = G★.∣_∣map h where 
   ma = fmap-alg h
   nat : ⟪ G ⟫map m ∘⇛ f _ ⇛≡ f _ ∘⇛ ⟪ F ⟫map m
   nat = !_ ∘ snd f# m
@@ -247,9 +223,8 @@ module ✶homap-nat (F : En A I)⦃ eF : ExtFor/ F lI ⦄
 \end{code}
 
 \begin{code}
- ✶homap-nat : fmap h ∘⇛ f' _ ⇛≡ f' _ ∘⇛ fmap h
- ✶homap-nat (i , ⟨ « t , xs ⟩) =    (⟨_⟩ ∘ (λ ■ → « (fst ■) , snd ■))
-                                 $≡ map✶homap-nat' i (t , xs)
- ✶homap-nat (i , ⟨ » t , xs ⟩) = <>
+ ✶homap-nat : G★.∣_∣map h ∘⇛ f' _ ⇛≡ f' _ ∘⇛ F★.∣_∣map h
+ ✶homap-nat (i , ⟨ inL/ t xs ⟩) = ⟨_⟩ ∘ uc inL/ $≡ map✶homap-nat' i (t , xs)
+ ✶homap-nat (i , ⟨ inR/ t xs ⟩) = <>
 \end{code}
 

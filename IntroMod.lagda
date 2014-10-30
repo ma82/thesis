@@ -4,7 +4,7 @@
 module thesis.IntroMod where
 
 open import AD.Misc hiding (true; false)
-open import AD.Instances
+open import AD.Hints
 \end{code}
 
 \begin{code}
@@ -71,27 +71,30 @@ module Modular where
 \end{code}
 
 \begin{code}
- Func = λ (F : Set → Set) → ∀ {A B} → (A → B) → F A → F B
 
- cata : ∀ {F}⦃ map : Instance (Func F) ⦄{X} → (F X → X) → μ F → X
- cata ⦃ map ⦄ α (In xs) = α (km map (cata ⦃ map ⦄ α) xs)
+ record Func (F : Set → Set) : Set₁ where
+   constructor func
+   field
+     unfunc : ∀ {A B} → (A → B) → F A → F B
+ open Func
+
+ cata : ∀ {F}⦃ map : Func F ⦄{X} → (F X → X) → μ F → X
+ cata ⦃ map ⦄ α (In xs) = α (unfunc map (cata α) xs)
 \end{code}
 
 \begin{code}
  instance
-   mapExpF   : Instance (Func ExpF)
-   mapTimesF : Instance (Func TimesF)
-   map+      : ∀ {F G}⦃ l : Instance (Func  F      ) ⦄
-                      ⦃ r : Instance (Func        G) ⦄
-                          → Instance (Func (F :+: G))
+   mapExpF   : Func ExpF
+   mapTimesF : Func TimesF
+   map+      : ∀ {F G}⦃ l : Func F ⦄ ⦃ r : Func G ⦄ → Func (F :+: G)
 \end{code}
 
 \begin{code}
-   km mapExpF                  f [ n   ] = [ n ]
-   km mapExpF                  f (l ⊕ r) = f l ⊕ f r
-   km mapTimesF                f (l ⊗ r) = f l ⊗ f r
-   km (map+ ⦃ mapF ⦄ ⦃ mapG ⦄) f (inl x) = inl (km mapF f x)
-   km (map+ ⦃ mapF ⦄ ⦃ mapG ⦄) f (inr y) = inr (km mapG f y)
+   unfunc mapExpF                  f [ n   ] = [ n ]
+   unfunc mapExpF                  f (l ⊕ r) = f l ⊕ f r
+   unfunc mapTimesF                f (l ⊗ r) = f l ⊗ f r
+   unfunc (map+ ⦃ mapF ⦄ ⦃ mapG ⦄) f (inl x) = inl (unfunc mapF f x)
+   unfunc (map+ ⦃ mapF ⦄ ⦃ mapG ⦄) f (inr y) = inr (unfunc mapG f y)
 \end{code}
 
 \begin{code}
@@ -115,30 +118,33 @@ module Modular where
 
 \begin{code}
  infix 3 _:<:_
- _:<:_ = λ (F G : Set → Set) → Instance (F ⇛ G)
+ record _:<:_ (F G : Set → Set) : Set₁ where
+   field
+     un:<: : F ⇛ G
+ open _:<:_
 
  instance
   injId : ∀ {F}                    → F :<: F      
   injL  : ∀ {F L R}⦃ p : F :<: L ⦄ → F :<: L :+: R
   injR  : ∀ {F L R}⦃ q : F :<: R ⦄ → F :<: L :+: R
-  km injId        _ x = x
-  km (injL ⦃ p ⦄) _ x = inl (km p _ x)
-  km (injR ⦃ p ⦄) _ x = inr (km p _ x)
+  un:<: injId        _ x = x
+  un:<: (injL ⦃ p ⦄) _ x = inl (un:<: p _ x)
+  un:<: (injR ⦃ p ⦄) _ x = inr (un:<: p _ x)
 \end{code}
 
 \begin{code}
  [[_]] : ∀ {F}⦃ inj : ExpF :<: F ⦄ → ℕ → μ F
- [[_]] ⦃ inj ⦄ n = In (km inj _ [ n ])
+ [[_]] ⦃ inj ⦄ n = In (un:<: inj _ [ n ])
 
  infix 3 _[⊕]_
 
  _[⊕]_ : ∀ {F}⦃ inj : ExpF :<: F ⦄ → μ F → μ F → μ F
- _[⊕]_ ⦃ inj ⦄ e1 e2 = In (km inj _ (e1 ⊕ e2))
+ _[⊕]_ ⦃ inj ⦄ e1 e2 = In (un:<: inj _ (e1 ⊕ e2))
 
  infix 4 _[⊗]_
 
  _[⊗]_ : ∀ {F}⦃ inj : TimesF :<: F ⦄ → μ F → μ F → μ F
- _[⊗]_ ⦃ inj ⦄ e1 e2 = In (km inj _ (e1 ⊗ e2))
+ _[⊗]_ ⦃ inj ⦄ e1 e2 = In (un:<: inj _ (e1 ⊗ e2))
 \end{code}
 
 \begin{code}

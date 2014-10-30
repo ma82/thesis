@@ -14,17 +14,11 @@ data De (I : Set lI) : Set (S lI) where
 
 \begin{code}
   `I : (i : I) → De I
-\end{code}
-
-\begin{code}
   `Σ `Π : (S : Set lI)(T : S → De I) → De I
 \end{code}
 
 \begin{code}
   `1   : De I
-\end{code}
-
-\begin{code}
   _`×_ : De I → De I → De I
 \end{code}
 
@@ -254,7 +248,8 @@ module IH {I : Set lI}{lX}{X : Set^ I lX}{lP}(P : Set^Σ X lP) where
 \end{code}
 
 \begin{code}
- private
+ module _ (⊘ : ∅) where
+
   to∘fr : (D : De I)(e : ExtFor D (lX ⊔ lI))(eP : ExtFor D (lP ⊔ S lI)) → to D ∘ fr D Π≡ id
   to∘fr (`I k)   e _ (_ , ↑ x) = ,_ ∘′ ↑_ $≡ <>
   to∘fr (`Σ S T) e eP ((s , t) , ih) = 
@@ -272,8 +267,7 @@ module IH {I : Set lI}{lX}{X : Set^ I lX}{lP}(P : Set^Σ X lP) where
    let b = λ s → □ (T s) P $≡ fst (≡→Σ≡ (to∘fr (T s) (extFor e  (T s))
                                                      (extFor eP (T s))
                                                      (f s , ihT s))) in
-   Σ≡→≡ ( e  (λ s → fst (rec s)) , eP (λ s → TODO ⊚ snd (rec s)))
-   where open import thesis.TODO
+   Σ≡→≡ ( e  (λ s → fst (rec s)) , eP (λ s → ⊘ ⊚ snd (rec s)))
 \end{code}
 
 \begin{code}
@@ -281,8 +275,7 @@ module IH {I : Set lI}{lX}{X : Set^ I lX}{lP}(P : Set^Σ X lP) where
   to∘fr (L `× R) (eL , eR) (eLP , eRP) ((ls , rs) , (ihL , ihR)) =
     let la , lb = ≡→Σ≡ $ to∘fr L eL eLP (ls , ihL) in
     let ra , rb = ≡→Σ≡ $ to∘fr R eR eRP (rs , ihR) in
-    Σ≡→≡ (ap₂ _,_ la ra , Σ≡→≡ ((TODO ⊚ lb) , TODO ⊚ rb))
-    where open import thesis.TODO -- This should be provable
+    Σ≡→≡ (ap₂ _,_ la ra , Σ≡→≡ ((⊘ ⊚ lb) , ⊘ ⊚ rb))
 \end{code}
 
 \begin{code}
@@ -450,6 +443,9 @@ _`>>=_ : ∀ {O N} → De N → (N → De O) → De O
 \begin{code}
 `1       `>>= F = `1
 (L `× R) `>>= F = L `>>= F `× R `>>= F
+
+`map : ∀ {A B} → (A → B) → De A → De B
+`map f D = D `>>= `return ∘ f
 
 open Nameless
 \end{code}

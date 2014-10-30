@@ -10,6 +10,8 @@ open import thesis.FreeMonad
 open import Data.Char
 open import Data.Bool
 open import Data.String as S
+
+open IsRawMonad.API ⦃...⦄
 \end{code}
 
 \begin{code}
@@ -67,11 +69,15 @@ module Teletype {A : Set}(`TT `getChar `putChar : A)(I : Set) where
 \end{code}
 
 \begin{code}
- getChar : ∀ {F} → ⦃ _ : Instance (GetCharF <: F) ⦄ → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ Char ]])
+ getChar : ∀ {F} → ⦃ _ : ||| GetCharF <: F ⦄ → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ Char ]])
  getChar = =>✶ ⦃ km-<: ⦄ (_ , λ c → ↑return (<> , c))
 
- putChar : ∀ {F} → ⦃ _ : Instance (PutCharF <: F) ⦄ → Char → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ ⊤ ]])
+ putChar : ∀ {F} → ⦃ _ : ||| PutCharF <: F ⦄ → Char → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ ⊤ ]])
  putChar c = =>✶ ⦃ km-<: ⦄ (_ , c , ↑return (<> , _))
+
+ evalAlg : {A : I → Set} → TeletypeF alg> IO ∘ A
+ evalAlg i (« _ , f      ) = getCh   IO.>>= ↓_ ∘ f
+ evalAlg i (» _ , c , ↑ x) = putCh c IO.>>= λ _ → x
 \end{code}
 
 \begin{code}
@@ -110,31 +116,39 @@ module FileSystem {A : Set}(`FS `openFile `readFile `closeFile : A) where
 \end{code}
 
 \begin{code}
- openFile : ∀ {F}⦃ p : Instance (OpenFileF <: F) ⦄ → FilePath → F ⊢ Closed ↓ [[ ⊤ ]]
+ openFile : ∀ {F}⦃ p : ||| OpenFileF <: F ⦄ → FilePath → F ⊢ Closed ↓ [[ ⊤ ]]
  openFile path = =>✶ ⦃ km-<: ⦄ (_ , path , λ _ → ↑return tt)
 
- readFile : ∀ {F}⦃ p : Instance (ReadFileF <: F) ⦄ → F ⊢ Open ↓ [κ String := Open ] ⊎/ ≡ Closed
+ readFile : ∀ {F}⦃ p : ||| ReadFileF <: F ⦄ → F ⊢ Open ↓ [κ String := Open ] ⊎/ ≡ Closed
  readFile = =>✶ ⦃ km-<: ⦄ (_ , λ { (¡ x) → ↑return (inl (<> , x))
                                  ;    ε  → ↑return (inr  <>     ) })
 
- closeFile : ∀ {F}⦃ p : Instance (CloseFileF <: F) ⦄ → F ⊢ Open ↓ ≡ Closed
- closeFile = =>✶ ⦃ km-<: ⦄ (_ , ↑ return <>)
+ closeFile : ∀ {F}⦃ p : ||| CloseFileF <: F ⦄ → F ⊢ Open ↓ ≡ Closed
+ closeFile = =>✶ ⦃ km-<: ⦄ (_ , ↑return <>)
+
+ evalAlg : {X : Set} → FileSystemF alg> [[ IO X ]]
+ evalAlg Closed (« « _ , fn , f) = openFi fn IO.>>= ↓_ ∘ f
+ evalAlg Open   (« « _ , () , _)
+ evalAlg Closed (« » _ , () , _)
+ evalAlg Open   (« » _ , f     ) = readFi IO.>>= (↓_ ∘ f ∘ ¡)
+ evalAlg Closed (»   _ , () , _)
+ evalAlg Open   (»   _ , m     ) = closeFi IO.>>= λ _ → ↓ m
 \end{code}
 
 \begin{code}
  module Example {F}⦃ p : FileSystemF <: F ⦄ where
 
-  open Instances (smartSubs<: p)
+  open Hints (smartSubs<: p)
 
   example : F ⊢ Closed ↓ [κ String := Closed ]
   example = openFile "test.txt" >> λ
-            { Closed → return (<> , "Error while opening.")
+            { Closed → return _ (<> , "Error while opening.")
             ; Open   → readFile >>= postRead }
     where
       postRead : [κ String := Open ] ⊎/ ≡ Closed ⇛ _
       postRead .Open  (inl (<> , contents)) = closeFile >>= λ { ._ <> →
-                                              return (<> , contents) }
-      postRead Closed (inr              <>) = return (<> , "Error while reading.")
+                                              return _ (<> , contents) }
+      postRead Closed (inr              <>) = return _ (<> , "Error while reading.")
 \end{code}
 
 \begin{code}
@@ -147,14 +161,13 @@ module Cat {A : Set}(`TT `getChar  `putChar             : A)
 \end{code}
 
 \begin{code}
-  open Instances (smartSubs<: p AD.++ smartSubs<: q)
-
+  open Hints (smartSubs<: p AD.++ smartSubs<: q)
 \end{code}
 
 \begin{code}
   cat : FilePath → F ⊢ Closed ↓ ≡ Closed
   cat fp = openFile fp >>= λ { Closed x → putChars openErrorMsg =>= λ _ →
-                                          return <>
+                                          return _ <>
                              ; Open   x → readFile >>= postRead }
    where
 
@@ -162,15 +175,15 @@ module Cat {A : Set}(`TT `getChar  `putChar             : A)
     readErrorMsg = S.toList "Error while reading the file!\n"
 
     putChars : List Char → F ⊢ Closed ↓ ≡ Closed ×/ [[ ⊤ ]]
-    putChars []       = return (<> , tt)
+    putChars []       = return _ (<> , tt)
     putChars (x ∷ xs) = putChar x =>= λ _ → putChars xs
 
     postRead : ≡ Open ×/ [[ String ]] ⊎/ ≡ Closed ⇛ F ✶ ≡ Closed
     postRead  Closed (inl (() , _)  )
     postRead .Closed (inr <>        ) = putChars readErrorMsg =>= λ _ →
-                                        return <>
+                                        return _ <>
     postRead .Open   (inl (<> , str)) = closeFile >>= λ { .Closed <> →
                                         putChars (S.toList str) =>= λ _ →
-                                        return <> }
+                                        return _ <> }
 \end{code}
 

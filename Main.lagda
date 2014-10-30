@@ -16,6 +16,5 @@ import thesis.Mu-A-Elim
 import thesis.Nat
 import thesis.Sub
 import thesis.SubExample
-import thesis.TODO
 \end{code}
 
