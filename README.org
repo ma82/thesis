@@ -1,6 +1,6 @@
 #+TITLE: Inductive families à la carte
 
-The purpose of this repository is to keep the code for my [[%5B%5Bhttp://acerbi.works/MatteoAcerbi-TesiLaureaMagistrale.pdf%5D%5BMSc%20thesis%5D%5D][MSc thesis]]
+The purpose of this repository is to keep the code for my [[http://acerbi.works/MatteoAcerbi-TesiLaureaMagistrale.pdf][MSc thesis]]
 (2014-03-10) compatible with the current development version of Agda,
 while trying out new ideas.
 
@@ -12,7 +12,7 @@ while trying out new ideas.
 
 * News
 
-- 2014-10-30 Recovering typechecking after AIM XX
+- 2014-10-30 Recovered typechecking after AIM XX
 - 2014-10-08 Switched to recursive instance search
 
 201?-2014 Matteo Acerbi
