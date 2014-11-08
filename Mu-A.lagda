@@ -9,7 +9,7 @@ open Nameless.AF hiding ([_] ; _⊕_)
 \end{code}
 
 \begin{code}
-A : Set^ I _
+A : ★^ I _
 A = μ `AF
 \end{code}
 

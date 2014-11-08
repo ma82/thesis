@@ -7,7 +7,7 @@ open Functor
 \end{code}
 
 \begin{code}
-record Lang {I : Set lI}{lD}(Dom : Set^ I lD) : Set (S lI ⊔ lD ⊔ lA) where
+record Lang {I : Set lI}{lD}(Dom : ★^ I lD) : Set (S lI ⊔ lD ⊔ lA) where
   constructor mk
   field    
     lang : En A I
@@ -16,7 +16,7 @@ open Lang public
 \end{code}
 
 \begin{code}
-_[_]Lang+_ : {I : Set lI}{D : Set^ I lI} → Lang D → 1+ A → Lang D → Lang D
+_[_]Lang+_ : {I : Set lI}{D : ★^ I lI} → Lang D → 1+ A → Lang D → Lang D
 L1 [ a ]Lang+ L2 = mk (a ⟩ (lang L1 ⊕ lang L2)) [ alg L1 , alg L2 ]⟦⟧
 \end{code}
 
@@ -25,7 +25,7 @@ L1 [ a ]Lang+ L2 = mk (a ⟩ (lang L1 ⊕ lang L2)) [ alg L1 , alg L2 ]⟦⟧
 \end{code}
 
 \begin{code}
-record MVC {O N : Set lI}{DSo : Set^ N lI}{DTa : Set^ O lI}
+record MVC {O N : Set lI}{DSo : ★^ N lI}{DTa : ★^ O lI}
            (So : Lang DSo)(H : Functor O N lI lI)(Ta : Lang DTa)
            {lP}(_ℝ_ : ∀ {i} → DSo i → ∣ H ∣ DTa i → Set lP)
            : Set (S lI ⊔ S lP ⊔ lA) where
@@ -77,7 +77,7 @@ record MVC {O N : Set lI}{DSo : Set^ N lI}{DTa : Set^ O lI}
 \end{code}
 
 \begin{code}
-module MVC+ {O N : Set lI}{DSo : Set^ N lI}{DTa : Set^ O lI}
+module MVC+ {O N : Set lI}{DSo : ★^ N lI}{DTa : ★^ O lI}
             (S1 S2 : Lang DSo)(H : Functor O N _ lI)(T : Lang DTa)
             {lP}(_ℝ_ : ∀ {i} → DSo i → ∣ H ∣ DTa i → Set lP)
             (a : 1+ A) where

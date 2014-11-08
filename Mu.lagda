@@ -23,7 +23,7 @@ In _ = ⟨_⟩
 \end{code}
 
 \begin{code}
-module Cata {F : En I}{lY}{Y : Set^ I lY}(α : F alg> Y) where
+module Cata {F : En I}{lY}{Y : ★^ I lY}(α : F alg> Y) where
 \end{code}
 
 \begin{code}
@@ -89,7 +89,7 @@ module Cata {F : En I}{lY}{Y : Set^ I lY}(α : F alg> Y) where
 \end{code}
 
 \begin{code}
-Mot = λ F lP → Set^Σ (μ F) lP 
+Mot = λ F lP → ★^Σ (μ F) lP
 
 _me>_ : ∀ (F : En I){lP} → Mot F lP → Set (lP ⊔ S lI)
 F me> P = □/ F P ⇛ P ∘ Σ.< fst , ⟨_⟩ ∘ snd >
@@ -152,7 +152,7 @@ module CataAp {F : En I}{lY}(eF : ∀ i → ExtFor (F i) (lI ⊔ lY))
 
 \begin{code}
 module Fusion (F : En I){lY}(eF : ExtFor/ F (lI ⊔ lY))
-              {lX}{X : Set^ I lX}{Y : Set^ I lY}
+              {lX}{X : ★^ I lX}{Y : ★^ I lY}
               (α : F alg> X)(β : F alg> Y)
               (k : X ⇛ Y)(h : β ∘⇛ ⟪ F ⟫map k ⇛≡ k ∘⇛ α) where
 
@@ -218,7 +218,7 @@ module FunctorFusion (F : En I)(eF : ExtFor/ F lI)
 \end{code}
 
 \begin{code}
-module _ {F : En I}{lY}{Y : Set^ I lY} where
+module _ {F : En I}{lY}{Y : ★^ I lY} where
 \end{code}
 
 \begin{code}
@@ -232,26 +232,26 @@ module _ {F : En I}{lY}{Y : Set^ I lY} where
 \end{code}
 
 \begin{code}
-_,_hpara>_ : ∀ (F H : En I){lY} → Set^ I lY → Set _
+_,_hpara>_ : ∀ (F H : En I){lY} → ★^ I lY → Set _
 F , H hpara> Y = ⟪ F ⟫ (μ H ×/ Y) ⇛ Y
 
-_para>_ : ∀ (F : En I){lY} → Set^ I lY → Set _
+_para>_ : ∀ (F : En I){lY} → ★^ I lY → Set _
 F para> Y = F , F hpara> Y
 \end{code}
 
 \begin{code}
-_,_hnme>_ : ∀ (F H : En I){lY} → Set^ I lY → Set _
+_,_hnme>_ : ∀ (F H : En I){lY} → ★^ I lY → Set _
 F , H hnme> Y = □/ {X = μ H} F (Y ∘ fst) ⇛ Y ∘ fst
 
-_nme>_ : ∀ (F : En I){lY} → Set^ I lY → Set _
+_nme>_ : ∀ (F : En I){lY} → ★^ I lY → Set _
 F nme> Y = F , F hnme> Y
 
-private test : ∀ {F lY}{Y : Set^ I lY} → F nme> Y ≡ F me> (Y ∘ fst)
+private test : ∀ {F lY}{Y : ★^ I lY} → F nme> Y ≡ F me> (Y ∘ fst)
         test = <>
 \end{code}
 
 \begin{code}
-module hpara↔hnme {lY}{Y : Set^ I lY}(F H : En I) where
+module hpara↔hnme {lY}{Y : ★^ I lY}(F H : En I) where
 
   module M = IH {X = μ H} (Y ∘ fst)
 
@@ -267,7 +267,7 @@ module para↔nme {lY}{Y} F = hpara↔hnme {lY}{Y} F F
 \end{code}
 
 \begin{code}
-module Para {F : En I}{lY}{Y : Set^ I lY}(α : F para> Y) where
+module Para {F : En I}{lY}{Y : ★^ I lY}(α : F para> Y) where
 
  para : μ F ⇛ Y
  para = cu (Elim.elim F _ (para↔nme.to F α))

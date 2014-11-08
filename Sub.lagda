@@ -73,7 +73,7 @@ module _ {A : Set lA}{O N : Set lI} where
 \end{code}
 
 \begin{code}
- module TreeCase (a : 1+ A){lX}{X : Set^ O lX}{lY}{Y : Set^ N lY}
+ module TreeCase (a : 1+ A){lX}{X : ★^ O lX}{lY}{Y : ★^ N lY}
                  {F G : O [ A ]► N}
                  where
 
@@ -102,13 +102,13 @@ module Kit where
 \end{code}
 
 \begin{code}
- □/ : ∀ {A : Set lA}{O N : Set lI}(F : O [ A ]► N){lX}{X : Set^ O lX}{lP} →
-        Set^Σ X lP → Set^Σ (⟪ F ⟫ X) _
+ □/ : ∀ {A : Set lA}{O N : Set lI}(F : O [ A ]► N){lX}{X : ★^ O lX}{lP} →
+        ★^Σ X lP → ★^Σ (⟪ F ⟫ X) _
  □/ F P (n , xs) = □ (F `$ n) P xs
 \end{code}
 
 \begin{code}
- module IH/ {A : Set lA}{O N : Set lI}{lX}{X : Set^ O lX}{lP}(P : Set^Σ X lP) where
+ module IH/ {A : Set lA}{O N : Set lI}{lX}{X : ★^ O lX}{lP}(P : ★^Σ X lP) where
 
   open IH P
 
@@ -124,7 +124,7 @@ module Kit where
            (f : X ⇛ Y) → ⟪ F ⟫ X ⇛ ⟪ F ⟫ Y
   ⟪ F ⟫map f n = ⟦ F `$ n ⟧map f
 
-  ⟪_,_⟫map-id⇛ : ∀ F {lX}(eF : ExtFor/ F (lX ⊔ lI)){X : Set^ O lX} →
+  ⟪_,_⟫map-id⇛ : ∀ F {lX}(eF : ExtFor/ F (lX ⊔ lI)){X : ★^ O lX} →
                  ⟪ F ⟫map {X = X} id⇛ ⇛≡ id⇛
   ⟪ F , eF ⟫map-id⇛ (n , xs) = ⟦ F `$ n , eF n ⟧map-id⇛ xs
 
@@ -147,7 +147,7 @@ module Kit where
   functor-ap F eF = mk (functor F eF) ⟪ F , eF ⟫map-cong
 
   □/→⟪⟫ : (F : O [ A ]► N) →
-          ∀ {lX}{X : Set^ O lX}{lY}{Y : Set^ O lY} →
+          ∀ {lX}{X : ★^ O lX}{lY}{Y : ★^ O lY} →
             □/ F {X = X} (Y ∘ fst) ⇛ ⟪ F ⟫ Y ∘ fst
   □/→⟪⟫ F (n , xs) = □→⟦⟧ (to▻ F n) xs
 \end{code}
@@ -188,7 +188,7 @@ module Kit where
 
    _pt[_]>_ : ∀ {A : Set lA}{O N}
                 (F : O [ A ]► N)(l : _)(G : O [ A ]► N) → Set (S l ⊔ lI)
-   F pt[ l ]> G = (X : Set^ _ l) → ⟪ F ⟫ X ⇛ ⟪ G ⟫ X
+   F pt[ l ]> G = (X : ★^ _ l) → ⟪ F ⟫ X ⇛ ⟪ G ⟫ X
 
    isNat : ∀ {A : Set lA}{O N}(F G : O [ A ]► N){l : _} →
              F pt[ l ]> G → Set (S l ⊔ lI)
@@ -314,7 +314,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : Set^ I lX}{i} where
+ module _ {lX}{X : ★^ I lX}{i} where
 \end{code}
 
 \begin{code}
@@ -334,7 +334,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : Set^ I lX} where
+ module _ {lX}{X : ★^ I lX} where
 \end{code}
 
 \begin{code}
@@ -346,7 +346,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : Set^ I lX}{lP}{P : Set^Σ X lP} where
+ module _ {lX}{X : ★^ I lX}{lP}{P : ★^Σ X lP} where
 
   □inj : {F G : En A I}⦃ < : F <: G ⦄ →
          □/ F P ⇛ □/ G P ∘ Σmm id (inj ⦃ < ⦄ _)
@@ -359,7 +359,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : Set^ I lX}{lY}{Y : Set^ I lY} where
+ module _ {lX}{X : ★^ I lX}{lY}{Y : ★^ I lY} where
 \end{code}
 
 \begin{code}
@@ -417,7 +417,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : Set^ I lX}{F G : En A I} where
+ module _ {lX}{X : ★^ I lX}{F G : En A I} where
 \end{code}
 
 \begin{code}
@@ -426,12 +426,12 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- _spara>_ :  ∀ (F : En A I){lY} → Set^ I lY → Set _
+ _spara>_ :  ∀ (F : En A I){lY} → ★^ I lY → Set _
  F spara> Y = (HS : Sup F) → (to▻ F) Mu., to▻ (fst HS) hpara> Y
 \end{code}
 
 \begin{code}
- module spara<: {F G : En A I}{lY}{Y : Set^ I lY} where
+ module spara<: {F G : En A I}{lY}{Y : ★^ I lY} where
 
    _spara[_]<:_ : F spara> Y → F <: G → G spara> Y → Set _
    α spara[ p ]<: β = ∀ H n xs →   β H n (inj ⦃ p ⦄ _ n xs)
@@ -439,7 +439,7 @@ module _ {A : Set lA}{I : Set lI} where
 
  open spara<: public
 
- module _ {F G : En A I}{lY}{Y : Set^ I lY} where
+ module _ {F G : En A I}{lY}{Y : ★^ I lY} where
 
    sparaSub : F spara> Y → (G <: F) → Set _
    sparaSub α < = Σ _ λ β → β spara[ < ]<: α
@@ -456,7 +456,7 @@ module _ {A : Set lA}{I : Set lI} where
  (n ⟩ (L ⊕ R)) − (]> <) = n ⟩ (L ⊕ (R − <))
  G             − []     = ε ⟩ [ (λ _ → `K ⊥) ]
 
- _+alg[_]_ : ∀ {F G}{lY}{Y : Set^ I lY} →
+ _+alg[_]_ : ∀ {F G}{lY}{Y : ★^ I lY} →
                F alg> Y → (< : F <: G) → (G − <) alg> Y → G alg> Y
  α +alg[ []   ] β = α
  α +alg[ <[ w ] β =
@@ -466,7 +466,7 @@ module _ {A : Set lA}{I : Set lI} where
    λ i → uc (uc ⊎.[ (λ _ t xs → β i (inL/ t xs))
                   , (λ _ → cu ((α +alg[ w ] (β ∘⇛ (λ i → inR ∘ snd))) i)) ])
 
- cata+- : ∀ {F G : En A I}(< : F <: G){lY}{Y : Set^ I lY} →
+ cata+- : ∀ {F G : En A I}(< : F <: G){lY}{Y : ★^ I lY} →
             (+ : F alg> Y)(- : (G − <) alg> Y) → μ G ⇛ Y
  cata+- {G = G} w + - = Cata.cata {F = G} (+ +alg[ w ] -)
 \end{code}

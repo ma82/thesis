@@ -19,11 +19,11 @@ infixr 1 _⊢_↓_
 \end{code}
 
 \begin{code}
-_⊢_↓_ = λ {A I : Set}(F : En A I)(s : I)(X : Set^ I _) → F ✶ X $ s
+_⊢_↓_ = λ {A I : Set}(F : En A I)(s : I)(X : ★^ I _) → F ✶ X $ s
 \end{code}
 
 \begin{code}
-[[_]] : {I : Set} → Set → Set^ I _
+[[_]] : {I : Set} → Set → ★^ I _
 [[ X ]] _ = X
 \end{code}
 

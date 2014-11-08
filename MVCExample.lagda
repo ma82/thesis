@@ -22,14 +22,14 @@ module _ {I : Set} where
 \end{code}
 
 \begin{code}
-module Stack {I : Set}(Ty : Set^ I Z) where 
+module Stack {I : Set}(Ty : ★^ I Z) where
 \end{code}
 
 \begin{code}
- head : ∀ {X : Set^ I Z}{i is} → □List X (i ∷ is) → X i
+ head : ∀ {X : ★^ I Z}{i is} → □List X (i ∷ is) → X i
  head (x , _) = x
 
- tail : ∀ {X : Set^ I Z}{i is} → □List X (i ∷ is) → □List X is
+ tail : ∀ {X : ★^ I Z}{i is} → □List X (i ∷ is) → □List X is
  tail (_ , xs) = xs
 \end{code}
 
@@ -77,7 +77,7 @@ open import Data.Bool
 \begin{code}
 module Prog {I A : Set}(`PUSH `+++ `<> `ADD : A)
             (addTy? : I → I → 1+ I)
-            (Ty     : Set^ I Z)
+            (Ty     : ★^ I Z)
             (_+_    : ∀ {i j k}⦃ q : addTy? i j ≡ ¡ k ⦄ → Ty i → Ty j → Ty k)
             where
 \end{code}
@@ -173,7 +173,7 @@ module Prog {I A : Set}(`PUSH `+++ `<> `ADD : A)
 \end{code}
 
 \begin{code}
-module Val {I A : Set}(`val : A)(Ty : Set^ I Z) where
+module Val {I A : Set}(`val : A)(Ty : ★^ I Z) where
 
  ValF : En A I
  ValF = ¡ `val ⟩ [ `K ∘ Ty ]
@@ -211,7 +211,7 @@ module Val {I A : Set}(`val : A)(Ty : Set^ I Z) where
 
 \begin{code}
 module Plus {I A : Set}(`plus : A)
-            (addTy? : I → I → 1+ I)(Ty : Set^ I Z)
+            (addTy? : I → I → 1+ I)(Ty : ★^ I Z)
             (_+_ : ∀ {i j k}⦃ q : addTy? i j ≡ ¡ k ⦄ → Ty i → Ty j → Ty k)
             where
 \end{code}

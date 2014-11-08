@@ -15,7 +15,7 @@ open Manifest lI
 \end{code}
 
 \begin{code}
-_⋆_ : En A I → Set^ I lI → En A I
+_⋆_ : En A I → ★^ I lI → En A I
 F ⋆ X = ε ⟩ (F ⊕ ε ⟩ [ `K ∘ X ])
 \end{code}
 
@@ -27,15 +27,15 @@ F ✶ X = μ (F ⋆ X)
 \end{code}
 
 \begin{code}
-roll : {F : En A I}{X : Set^ I lI} → F alg> F ✶ X
+roll : {F : En A I}{X : ★^ I lI} → F alg> F ✶ X
 roll i (t , xs) = ⟨ (inL/ t xs) ⟩
 
-var  : {F : En A I}{X : Set^ I lI} → X ⇛ F ✶ X
+var  : {F : En A I}{X : ★^ I lI} → X ⇛ F ✶ X
 var i v = ⟨ (inR/ _ (v , _)) ⟩
 \end{code}
 
 \begin{code}
-module Cata✶ {lY}{F : En A I}{X : Set^ I lI}{Y : Set^ I lY} where
+module Cata✶ {lY}{F : En A I}{X : ★^ I lI}{Y : ★^ I lY} where
 
  open Cata {F = F ⋆ X}
 \end{code}
@@ -46,7 +46,7 @@ module Cata✶ {lY}{F : En A I}{X : Set^ I lI}{Y : Set^ I lY} where
 \end{code}
 
 \begin{code}
-cata✶⊥ : ∀ {lY}{F : En A I}{Y : Set^ I lY} →
+cata✶⊥ : ∀ {lY}{F : En A I}{Y : ★^ I lY} →
          F alg> Y → (F ✶ ⊥/) ⇛ Y
 cata✶⊥ = Cata✶.cata✶ § magic/
 \end{code}
@@ -82,7 +82,7 @@ open IsRawMonad.API ⦃...⦄
 TODO Also treat these generically for indexed monads in AD.Misc (or AD.Monad?)
 
 \begin{code}
-✑ : ∀ F i j (X : Set^ I lI) → ★ lI
+✑ : ∀ F i j (X : ★^ I lI) → ★ lI
 ✑ F i j X = F ✶ [ X := j ] $ i
 
 ✑return : ∀ {F A i} → A i → ✑ F i i A
@@ -108,7 +108,7 @@ fmap-alg f = [ roll , var ∘⇛ f ∘⇛ fst/ ∘⇛ snd/ ]⟦⟧
 
 \begin{code}
 module Init✶ (F : En A I)(eF : ∀ {l} → ExtFor/ F l)
-             {X : Set^ I lI}{lY}{Y : Set^ I lY}
+             {X : ★^ I lI}{lY}{Y : ★^ I lY}
              (α : F alg> Y)(ξ : X ⇛ Y)
              (k : F ✶ X ⇛ Y)
              (hr : α ∘⇛ ⟪ F ⟫map k ⇛≡ k ∘⇛ roll)
@@ -144,23 +144,23 @@ module _ {F G : En A I} where
 \end{code}
 
 \begin{code}
- inj⋆# : ⦃ _ : F <: G ⦄{X : Set^ I lI} → F ⋆ X nt> G ⋆ X
+ inj⋆# : ⦃ _ : F <: G ⦄{X : ★^ I lI} → F ⋆ X nt> G ⋆ X
  inj⋆# = nt→nt⋆ inj#
 
- inj⋆ : ⦃ _ : F <: G ⦄{X : Set^ I lI} → F ⋆ X pt> G ⋆ X
+ inj⋆ : ⦃ _ : F <: G ⦄{X : ★^ I lI} → F ⋆ X pt> G ⋆ X
  inj⋆ = fst inj⋆#
 
- =>✶ : ⦃ p : F <: G ⦄{X : Set^ I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
+ =>✶ : ⦃ p : F <: G ⦄{X : ★^ I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
  =>✶ (t , xs) = ⟨ inj⋆ _ _ (inL/ t xs) ⟩
 \end{code}
 
 \begin{code}
- ✶homap : F pt> G → (X : Set^ I lI) → F ✶ X ⇛ G ✶ X
+ ✶homap : F pt> G → (X : ★^ I lI) → F ✶ X ⇛ G ✶ X
  ✶homap f X i xs = Mu.μhomap (pt→pt⋆ f) i xs
 \end{code}
 
 \begin{code}
- =>✶' : ⦃ p : F <: G ⦄{X : Set^ I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
+ =>✶' : ⦃ p : F <: G ⦄{X : ★^ I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
  =>✶' xs = roll _ (inj _ _ xs)
 \end{code}
 
@@ -173,7 +173,7 @@ module _ {F G : En A I} where
 module ✶homap-nat (F : En A I)⦃ eF : ExtFor/ F lI ⦄
                   (G : En A I)⦃ eG : ExtFor/ G lI ⦄
                   (f# : F nt> G)
-                  {X Y : Set^ I lI}(h : X ⇛ Y) where
+                  {X Y : ★^ I lI}(h : X ⇛ Y) where
 
  private
   f = fst f#
