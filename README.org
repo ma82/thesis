@@ -6,9 +6,9 @@ while trying out new ideas.
 
 * Dependencies
 
-- https://github.com/ma82/adapter     (tested with be76ad4)
-- https://github.com/agda/agda-stdlib (tested with 8c60c6b)
-- https://github.com/agda/agda        (tested with 5ad160f)
+- https://github.com/ma82/adapter     c21a961
+- https://github.com/agda/agda-stdlib 8c60c6b
+- https://github.com/agda/agda        5ad160f
 
 * News
 
