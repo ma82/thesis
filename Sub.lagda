@@ -349,7 +349,7 @@ module _ {A : Set lA}{I : Set lI} where
  module _ {lX}{X : Set^ I lX}{lP}{P : Set^Σ X lP} where
 
   □inj : {F G : En A I}⦃ < : F <: G ⦄ →
-         □/ F P ⇛ □/ G P ∘ Σmap id (inj ⦃ < ⦄ _)
+         □/ F P ⇛ □/ G P ∘ Σmm id (inj ⦃ < ⦄ _)
 \end{code}
 
 \begin{code}
