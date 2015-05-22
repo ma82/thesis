@@ -62,6 +62,8 @@ module Modular where
 \end{code}
 
 \begin{code}
+ infixr 5 _:+:_
+
  _:+:_ : (Set → Set) → (Set → Set) → Set → Set
  (F :+: G) X = F X ⊎ G X
 \end{code}

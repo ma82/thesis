@@ -42,7 +42,7 @@ module _ {A : Set lA}{O N : Set lI} where
 \end{code}
 
 \begin{code}
-  _`$_ : {A : Set lA}{O N : Set lI} → O [ A ]► N → O ▻ N
+  _`$_ : {O N : Set lI} → O [ A ]► N → O ▻ N
   (_ ⟩ [ F ]  ) `$ n = F n
   (_ ⟩ (L ⊕ R)) `$ n = `Σ (name L +∋ name R) ⊎.[ (λ _ → L `$ n) , (λ _ → R `$ n) ]
 \end{code}
@@ -73,7 +73,7 @@ module _ {A : Set lA}{O N : Set lI} where
 \end{code}
 
 \begin{code}
- module TreeCase (a : 1+ A){lX}{X : ★^ O lX}{lY}{Y : ★^ N lY}
+ module TreeCase (a : 1+ A){lX}{X : Pow O lX}{lY}{Y : Pow N lY}
                  {F G : O [ A ]► N}
                  where
 
@@ -84,8 +84,8 @@ module _ {A : Set lA}{O N : Set lI} where
   [_,_]⟦⟧ : ⟪ to▻ F             ⟫ X ⇛ Y →
             ⟪ to▻ G             ⟫ X ⇛ Y →
             ⟪ to▻ (a ⟩ (F ⊕ G)) ⟫ X ⇛ Y
-  [ α , β ]⟦⟧ n (« x , p) = α n (x , p)
-  [ α , β ]⟦⟧ n (» x , p) = β n (x , p)
+  [ α , β ]⟦⟧ n ((« x) , p) = α n (x , p)
+  [ α , β ]⟦⟧ n ((» x) , p) = β n (x , p)
 \end{code}
 
 \begin{code}
@@ -102,13 +102,13 @@ module Kit where
 \end{code}
 
 \begin{code}
- □/ : ∀ {A : Set lA}{O N : Set lI}(F : O [ A ]► N){lX}{X : ★^ O lX}{lP} →
-        ★^Σ X lP → ★^Σ (⟪ F ⟫ X) _
+ □/ : ∀ {A : Set lA}{O N : Set lI}(F : O [ A ]► N){lX}{X : Pow O lX}{lP} →
+        Pow/ X lP → Pow/ (⟪ F ⟫ X) _
  □/ F P (n , xs) = □ (F `$ n) P xs
 \end{code}
 
 \begin{code}
- module IH/ {A : Set lA}{O N : Set lI}{lX}{X : ★^ O lX}{lP}(P : ★^Σ X lP) where
+ module IH/ {A : Set lA}{O N : Set lI}{lX}{X : Pow O lX}{lP}(P : Pow/ X lP) where
 
   open IH P
 
@@ -124,7 +124,7 @@ module Kit where
            (f : X ⇛ Y) → ⟪ F ⟫ X ⇛ ⟪ F ⟫ Y
   ⟪ F ⟫map f n = ⟦ F `$ n ⟧map f
 
-  ⟪_,_⟫map-id⇛ : ∀ F {lX}(eF : ExtFor/ F (lX ⊔ lI)){X : ★^ O lX} →
+  ⟪_,_⟫map-id⇛ : ∀ F {lX}(eF : ExtFor/ F (lX ⊔ lI)){X : Pow O lX} →
                  ⟪ F ⟫map {X = X} id⇛ ⇛≡ id⇛
   ⟪ F , eF ⟫map-id⇛ (n , xs) = ⟦ F `$ n , eF n ⟧map-id⇛ xs
 
@@ -147,7 +147,7 @@ module Kit where
   functor-ap F eF = mk (functor F eF) ⟪ F , eF ⟫map-cong
 
   □/→⟪⟫ : (F : O [ A ]► N) →
-          ∀ {lX}{X : ★^ O lX}{lY}{Y : ★^ O lY} →
+          ∀ {lX}{X : Pow O lX}{lY}{Y : Pow O lY} →
             □/ F {X = X} (Y ∘ fst) ⇛ ⟪ F ⟫ Y ∘ fst
   □/→⟪⟫ F (n , xs) = □→⟦⟧ (to▻ F n) xs
 \end{code}
@@ -178,17 +178,17 @@ module Kit where
 \begin{code}
  infixr 5 _[⊗]_
  _[⊗]_ : {A : _}{O N : _} → O [ A ]► N → O [ A ]► N → O [ A ]► N
- L [⊗] R = < [ (λ n → L `$ n `× R `$ n) ] >
+ L [⊗] R = < [ (λ n → (L `$ n) `× (R `$ n)) ] >
 \end{code}
 
 \begin{code}
  module NT+ where
 
-   infixr 6 _pt[_]>_ _pt>_ _nt[_]>_ _nt>_
+   infixr 2 _pt[_]>_ _pt>_ _nt[_]>_ _nt>_
 
    _pt[_]>_ : ∀ {A : Set lA}{O N}
                 (F : O [ A ]► N)(l : _)(G : O [ A ]► N) → Set (S l ⊔ lI)
-   F pt[ l ]> G = (X : ★^ _ l) → ⟪ F ⟫ X ⇛ ⟪ G ⟫ X
+   F pt[ l ]> G = (X : Pow _ l) → ⟪ F ⟫ X ⇛ ⟪ G ⟫ X
 
    isNat : ∀ {A : Set lA}{O N}(F G : O [ A ]► N){l : _} →
              F pt[ l ]> G → Set (S l ⊔ lI)
@@ -248,6 +248,8 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
+ infixr 5 _<:∘_
+
  _<:∘_ : {F G H : En A I} → F <: G → G <: H → F <: H
  p <:∘ []   = p
  p <:∘ <[ q = <[ (p <:∘ q)
@@ -314,7 +316,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : ★^ I lX}{i} where
+ module _ {lX}{X : Pow I lX}{i} where
 \end{code}
 
 \begin{code}
@@ -334,7 +336,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : ★^ I lX} where
+ module _ {lX}{X : Pow I lX} where
 \end{code}
 
 \begin{code}
@@ -346,7 +348,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : ★^ I lX}{lP}{P : ★^Σ X lP} where
+ module _ {lX}{X : Pow I lX}{lP}{P : Pow/ X lP} where
 
   □inj : {F G : En A I}⦃ < : F <: G ⦄ →
          □/ F P ⇛ □/ G P ∘ Σmm id (inj ⦃ < ⦄ _)
@@ -359,7 +361,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : ★^ I lX}{lY}{Y : ★^ I lY} where
+ module _ {lX}{X : Pow I lX}{lY}{Y : Pow I lY} where
 \end{code}
 
 \begin{code}
@@ -417,7 +419,7 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- module _ {lX}{X : ★^ I lX}{F G : En A I} where
+ module _ {lX}{X : Pow I lX}{F G : En A I} where
 \end{code}
 
 \begin{code}
@@ -426,12 +428,12 @@ module _ {A : Set lA}{I : Set lI} where
 \end{code}
 
 \begin{code}
- _spara>_ :  ∀ (F : En A I){lY} → ★^ I lY → Set _
+ _spara>_ :  ∀ (F : En A I){lY} → Pow I lY → Set _
  F spara> Y = (HS : Sup F) → (to▻ F) Mu., to▻ (fst HS) hpara> Y
 \end{code}
 
 \begin{code}
- module spara<: {F G : En A I}{lY}{Y : ★^ I lY} where
+ module spara<: {F G : En A I}{lY}{Y : Pow I lY} where
 
    _spara[_]<:_ : F spara> Y → F <: G → G spara> Y → Set _
    α spara[ p ]<: β = ∀ H n xs →   β H n (inj ⦃ p ⦄ _ n xs)
@@ -439,7 +441,7 @@ module _ {A : Set lA}{I : Set lI} where
 
  open spara<: public
 
- module _ {F G : En A I}{lY}{Y : ★^ I lY} where
+ module _ {F G : En A I}{lY}{Y : Pow I lY} where
 
    sparaSub : F spara> Y → (G <: F) → Set _
    sparaSub α < = Σ _ λ β → β spara[ < ]<: α
@@ -454,19 +456,19 @@ module _ {A : Set lA}{I : Set lI} where
  _−_ : ∀ {F} G → F <: G → En A I
  (n ⟩ (L ⊕ R)) − (<[ <) = n ⟩ ((L − <) ⊕ R)
  (n ⟩ (L ⊕ R)) − (]> <) = n ⟩ (L ⊕ (R − <))
- G             − []     = ε ⟩ [ (λ _ → `K ⊥) ]
+ G             − []     = ε ⟩ _[_]▻_.[ (λ _ → `K ⊥) ]
 
- _+alg[_]_ : ∀ {F G}{lY}{Y : ★^ I lY} →
+ _+alg[_]_ : ∀ {F G}{lY}{Y : Pow I lY} →
                F alg> Y → (< : F <: G) → (G − <) alg> Y → G alg> Y
  α +alg[ []   ] β = α
  α +alg[ <[ w ] β =
    λ i → uc (uc ⊎.[ (λ _ → cu ((α +alg[ w ] (β ∘⇛ (λ i → inL ∘ snd))) i))
-                  , (λ _ t xs → β i (inR/ t xs))                          ])
+                  , (λ _ t xs → β i (inR xs))                          ])
  α +alg[ ]> w ] β =
-   λ i → uc (uc ⊎.[ (λ _ t xs → β i (inL/ t xs))
+   λ i → uc (uc ⊎.[ (λ _ t xs → β i (inL xs))
                   , (λ _ → cu ((α +alg[ w ] (β ∘⇛ (λ i → inR ∘ snd))) i)) ])
 
- cata+- : ∀ {F G : En A I}(< : F <: G){lY}{Y : ★^ I lY} →
+ cata+- : ∀ {F G : En A I}(< : F <: G){lY}{Y : Pow I lY} →
             (+ : F alg> Y)(- : (G − <) alg> Y) → μ G ⇛ Y
  cata+- {G = G} w + - = Cata.cata {F = G} (+ +alg[ w ] -)
 \end{code}

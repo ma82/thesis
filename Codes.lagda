@@ -53,7 +53,7 @@ extFor e (L `× R) = extFor e L , extFor e R
 \end{code}
 
 \begin{code}
-⟦_⟧ : ∀ {I} → De I → ∀ {lX} → ★^ I lX → ★ (lX ⊔ lI)
+⟦_⟧ : ∀ {I} → De I → ∀ {lX} → Pow I lX → ★ (lX ⊔ lI)
 ⟦ `I i   ⟧ X = ^ lI (X i)
 ⟦ `Σ S T ⟧ X = Σ S λ s → ⟦ T s ⟧ X
 ⟦ `Π S T ⟧ X = Π S λ s → ⟦ T s ⟧ X
@@ -93,7 +93,7 @@ module _ {I} where
 \end{code}
 
 \begin{code}
-module Redundant {I : Set lI}{lX}{X : ★^ I lX} where
+module Redundant {I : Set lI}{lX}{X : Pow I lX} where
 \end{code}
 
 \begin{code}
@@ -111,7 +111,7 @@ module Redundant {I : Set lI}{lX}{X : ★^ I lX} where
 \end{code}
 
 \begin{code}
-module _ {I}{lX}{X : ★^ I lX}{lY}{Y : ★^ I lY} where
+module _ {I}{lX}{X : Pow I lX}{lY}{Y : Pow I lY} where
 \end{code}
 
 \begin{code}
@@ -132,7 +132,7 @@ mapExpF f = ⟦ `ExpF ⟧map (κ f)
 \end{code}
 
 \begin{code}
-module _ {I : Set lI}{lX}{X : ★^ I lX} where
+module _ {I : Set lI}{lX}{X : Pow I lX} where
   
  private l = lI ⊔ lX
 \end{code}
@@ -152,7 +152,7 @@ module _ {I : Set lI}{lX}{X : ★^ I lX} where
 
 \begin{code}
 module _ {I : Set lI}{lZ}{lX lY}
-         {X : ★^ I lX}{Y : ★^ I lY}{Z : ★^ I lZ}{f : Y ⇛ Z}{g : X ⇛ Y}
+         {X : Pow I lX}{Y : Pow I lY}{Z : Pow I lZ}{f : Y ⇛ Z}{g : X ⇛ Y}
          where
 
   private l = lI ⊔ lZ
@@ -174,7 +174,7 @@ module _ {I : Set lI}{lZ}{lX lY}
 
 \begin{code}
 ⟦_,_⟧map-cong : ∀ {I : Set lI}(D : De I){lX lY}(e : ExtFor D (lI ⊔ lY))
-                  {X : ★^ I lX}{Y : ★^ I lY}
+                  {X : Pow I lX}{Y : Pow I lY}
                   {f g : X ⇛ Y} → f ⇛≡ g → ⟦ D ⟧map f Π≡ ⟦ D ⟧map g
 \end{code}
 
@@ -193,7 +193,7 @@ module _ {I : Set lI}{lX}{X : I → Set lX}{lP} where
 \end{code}
 
 \begin{code}
- □ : (D : De I) → ★^Σ X lP → ★^ (⟦ D ⟧ X) l
+ □ : (D : De I) → Pow/ X lP → Pow (⟦ D ⟧ X) l
  □ (`I k)   P (↑ x)   = ^ (S lI) (P (, x))
  □ (`Σ S T) P (s , t) = □ (T s) P t
  □ (`Π S T) P f       = Π S λ s → □ (T s) P (f s)
@@ -205,7 +205,7 @@ module _ {I : Set lI}{lX}{X : I → Set lX}{lP} where
 \end{code}
 
 \begin{code}
-module IH {I : Set lI}{lX}{X : ★^ I lX}{lP}(P : ★^Σ X lP) where
+module IH {I : Set lI}{lX}{X : Pow I lX}{lP}(P : Pow/ X lP) where
 \end{code}
 
 \begin{code}
@@ -283,9 +283,9 @@ module IH {I : Set lI}{lX}{X : ★^ I lX}{lP}(P : ★^Σ X lP) where
 
   ⟦Σ⟧≅Σ⟦⟧□ : (D : De I) → ⟦ D ⟧ (Σ/ X P) Ext l⊔ , l⊔ →≅ Σ (⟦ D ⟧ X) (□ D P)
   ⟦Σ⟧≅Σ⟦⟧□ D =
-    iso (to D) (fr D) (λ e → ↓ext l⊔ l⊔ e (fr∘to D (extFor (↓ext l⊔ l⊔ e) D)))
-                      (λ e → ↓ext l⊔ l⊔ e (to∘fr D (extFor (↓ext l⊔ l⊔ e) D)
-                                                   (extFor (↓ext l⊔ l⊔ e) D)))
+    mk (to D) (fr D) (λ e → ↓ext l⊔ l⊔ e (fr∘to D (extFor (↓ext l⊔ l⊔ e) D)))
+                     (λ e → ↓ext l⊔ l⊔ e (to∘fr D (extFor (↓ext l⊔ l⊔ e) D)
+                                                  (extFor (↓ext l⊔ l⊔ e) D)))
 \end{code}
 
 \begin{code}
@@ -299,7 +299,7 @@ module _ {I : Set lI}{lX : _}{X : I → Set lX}{lY : _}{Y : I → Set lY} where
 \end{code}
 
 \begin{code}
-module _ {I : Set lI}{lX}{X : ★^ I lX}{lP}{P : ★^Σ X lP} where
+module _ {I : Set lI}{lX}{X : Pow I lX}{lP}{P : Pow/ X lP} where
 \end{code}
 
 \begin{code}
@@ -323,7 +323,7 @@ module Nameless where
 \end{code}
 
 \begin{code}
- ⟪_⟫ : ∀ {O N} → (F : O ▻ N) → ∀ {lX} → ★^ O lX → ★^ N _
+ ⟪_⟫ : ∀ {O N} → (F : O ▻ N) → ∀ {lX} → Pow O lX → Pow N _
  ⟪ F ⟫ X n = ⟦ F n ⟧ X
 \end{code}
 
@@ -348,7 +348,7 @@ module Nameless where
   `AF : En I
   `AF i = `Σ Two ⊎.[ nκ (`K (Ty i)) , nκ (`K (i == nat) `× `I nat `× `I nat) ]
 
-  AF : ★^ I lI → ★^ I lI
+  AF : Pow I lI → Pow I lI
   AF = ⟪ `AF ⟫
 \end{code}
 
@@ -361,7 +361,7 @@ module Nameless where
 \end{code}
 
 \begin{code}
- module _ {O N}{lX}{X : ★^ O lX}{lY}{Y : ★^ O lY} where
+ module _ {O N}{lX}{X : Pow O lX}{lY}{Y : Pow O lY} where
 \end{code}
 
 \begin{code}
@@ -370,11 +370,11 @@ module Nameless where
 \end{code}
 
 \begin{code}
- module _ {O N}{lX}{X : ★^ O lX}{lP} where
+ module _ {O N}{lX}{X : Pow O lX}{lP} where
 \end{code}
 
 \begin{code}
-  □/ : (F : O ▻ N) → ★^Σ X lP → ★^Σ (⟪ F ⟫ X) _
+  □/ : (F : O ▻ N) → Pow/ X lP → Pow/ (⟪ F ⟫ X) _
   □/ F X (n , xs) = □ (F n) X xs
 \end{code}
 
@@ -391,11 +391,11 @@ module Nameless where
 \end{code}
 
 \begin{code}
-  _alg>_ : (F : En I) → ∀ {lY} → ★^ I lY → _
+  _alg>_ : (F : En I) → ∀ {lY} → Pow I lY → _
   F alg> Y = ⟪ F ⟫ Y ⇛ Y
 
   _-ALG_ : En I → ∀ lY → Set _
-  F -ALG lY = Σ (★^ _ lY) (_alg>_ F)
+  F -ALG lY = Σ (Pow _ lY) (_alg>_ F)
 \end{code}
 
 \begin{code}
@@ -405,12 +405,12 @@ module Nameless where
 
 \begin{code}
   _pt[_]>_ : (F : O ▻ N) → ∀ l (G : O ▻ N) → Set _
-  F pt[ l ]> G = (X : ★^ O l) → ⟪ F ⟫ X ⇛ ⟪ G ⟫ X
+  F pt[ l ]> G = (X : Pow O l) → ⟪ F ⟫ X ⇛ ⟪ G ⟫ X
 \end{code}
 
 \begin{code}
   _pt>_ : (F G : O ▻ N) → Set _
-  F pt> G = (X : ★^ _ lI) → ⟪ F ⟫ X ⇛ ⟪ G ⟫ X
+  F pt> G = (X : Pow _ lI) → ⟪ F ⟫ X ⇛ ⟪ G ⟫ X
 \end{code}
 
 \begin{code}
@@ -439,7 +439,7 @@ _`>>=_ : ∀ {O N} → De N → (N → De O) → De O
 `Σ S T   `>>= F = `Σ S λ s → T s `>>= F
 `Π S T   `>>= F = `Π S λ s → T s `>>= F
 \end{code}
-
+p
 \begin{code}
 `1       `>>= F = `1
 (L `× R) `>>= F = L `>>= F `× R `>>= F

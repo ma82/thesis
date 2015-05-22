@@ -33,7 +33,7 @@ open Elim
 \begin{code}
 +alg : NatF alg> nκ (Nat → Nat)
 +alg _ (`zero , _) = id
-+alg _ (`suc  , m) = suc ∘ ↓ m
++alg _ (`suc  , m) = suc ∘ (↓ m)
 \end{code}
 
 \begin{code}
@@ -42,15 +42,15 @@ _+_ = cata +alg _
 \end{code}
 
 \begin{code}
-2+1≡3 : suc (suc zero) + suc zero ≡ suc (suc (suc zero))
+2+1≡3 : (suc (suc zero) + suc zero) ≡ suc (suc (suc zero))
 2+1≡3 = <>
 \end{code}
 
 \begin{code}
-+-associative : ∀ m n o → (m + n) + o ≡ m + (n + o)
++-associative : ∀ m n o → ((m + n) + o) ≡ (m + (n + o))
 +-associative = elim NatF P me ∘ ,_
  where P  : ⊤ × Nat → Set
-       P (_ , m) = ∀ n o → (m + n) + o ≡ m + (n + o)
+       P (_ , m) = ∀ n o → ((m + n) + o) ≡ (m + (n + o))
        me : NatF me> P
        me (α , `zero , xs) ih n o = <>
        me (α , `suc  , xs) ih n o = suc $≡ ↓_ ih n o

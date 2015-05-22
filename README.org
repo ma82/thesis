@@ -1,18 +1,9 @@
 #+TITLE: Inductive families à la carte
 
-The purpose of this repository is to keep the code for my [[http://acerbi.works/MatteoAcerbi-TesiLaureaMagistrale.pdf][MSc thesis]]
-(2014-03-10) compatible with the current development version of Agda,
-while trying out new ideas.
+Code for my [[http://acerbi.works/MatteoAcerbi-TesiLaureaMagistrale.pdf][MSc thesis]] (2014-03-10), updated to a more recent Agda.
 
 * Dependencies
 
 - https://github.com/ma82/adapter     c21a961
-- https://github.com/agda/agda-stdlib 8c60c6b
-- https://github.com/agda/agda        5ad160f
-
-* News
-
-- 2014-10-30 Recovered typechecking after AIM XX
-- 2014-10-08 Switched to recursive instance search
-
-201?-2014 Matteo Acerbi
+- https://github.com/agda/agda-stdlib e7a1d3e
+- https://github.com/agda/agda        9b68c3b

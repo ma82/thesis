@@ -22,14 +22,14 @@ module _ {I : Set} where
 \end{code}
 
 \begin{code}
-module Stack {I : Set}(Ty : ★^ I Z) where
+module Stack {I : Set}(Ty : Pow I Z) where
 \end{code}
 
 \begin{code}
- head : ∀ {X : ★^ I Z}{i is} → □List X (i ∷ is) → X i
+ head : ∀ {X : Pow I Z}{i is} → □List X (i ∷ is) → X i
  head (x , _) = x
 
- tail : ∀ {X : ★^ I Z}{i is} → □List X (i ∷ is) → □List X is
+ tail : ∀ {X : Pow I Z}{i is} → □List X (i ∷ is) → □List X is
  tail (_ , xs) = xs
 \end{code}
 
@@ -52,7 +52,7 @@ module Stack {I : Set}(Ty : ★^ I Z) where
 \begin{code}
    stackAdd : {t1 t2 t : I}⦃ q : addTy? t1 t2 ≡ ¡ t ⦄
               (ss : List I) → ST (t2 ∷ t1 ∷ ss , t ∷ ss)
-   stackAdd _ (v2 , v1 , vs) = v1 + v2 , vs
+   stackAdd _ (v2 , v1 , vs) = (v1 + v2) , vs
  \end{code}
 
 \iffalse
@@ -63,7 +63,7 @@ module Stack {I : Set}(Ty : ★^ I Z) where
 
 \begin{code}
  _ℝ_ : {i : I} → Ty i → ∣ H ∣ ST i → Set
- e ℝ f = ∀ ss xs → e , xs ≡ f ss xs
+ e ℝ f = ∀ ss xs → (e , xs) ≡ f ss xs
 \end{code}
 
 \begin{code}
@@ -77,7 +77,7 @@ open import Data.Bool
 \begin{code}
 module Prog {I A : Set}(`PUSH `+++ `<> `ADD : A)
             (addTy? : I → I → 1+ I)
-            (Ty     : ★^ I Z)
+            (Ty     : Pow I Z)
             (_+_    : ∀ {i j k}⦃ q : addTy? i j ≡ ¡ k ⦄ → Ty i → Ty j → Ty k)
             where
 \end{code}
@@ -173,7 +173,7 @@ module Prog {I A : Set}(`PUSH `+++ `<> `ADD : A)
 \end{code}
 
 \begin{code}
-module Val {I A : Set}(`val : A)(Ty : ★^ I Z) where
+module Val {I A : Set}(`val : A)(Ty : Pow I Z) where
 
  ValF : En A I
  ValF = ¡ `val ⟩ [ `K ∘ Ty ]
@@ -211,7 +211,7 @@ module Val {I A : Set}(`val : A)(Ty : ★^ I Z) where
 
 \begin{code}
 module Plus {I A : Set}(`plus : A)
-            (addTy? : I → I → 1+ I)(Ty : ★^ I Z)
+            (addTy? : I → I → 1+ I)(Ty : Pow I Z)
             (_+_ : ∀ {i j k}⦃ q : addTy? i j ≡ ¡ k ⦄ → Ty i → Ty j → Ty k)
             where
 \end{code}
@@ -269,11 +269,11 @@ module Plus {I A : Set}(`plus : A)
      rhs = c1 (j ∷ is) (c2 is ss)
      rec : lhs ≡ rhs
      rec = ihL (j ∷ is) _ ⊚ c1 (j ∷ is) $≡ ihR is ss
-     infix 4 _≣_
+     infix 2 _≣_
      _≣_ = Id (Stack (k ∷ is))
-     goal : d1 + d2 , ss ≣ head rhs + head (tail rhs) , tail (tail rhs)
-     goal = rew (λ s →   (d1 + d2 , ss)
-                       ≣ (head s + head (tail s) , tail (tail s)))
+     goal : (d1 + d2) , ss ≣ (head rhs + head (tail rhs)) , tail (tail rhs)
+     goal = rew (λ s →   (d1 + d2) , ss
+                       ≣ (head s + head (tail s)) , tail (tail s))
                 rec <>
 \end{code}
 
@@ -315,7 +315,7 @@ module Val+Plus where
  private
   testOK : (t : Types)(x : μ (lang ExpL) t)
               (ss : List Types)(xs : Stack ss) →
-                 eval _ x , xs ≡ exec _ (comp _ x ss) xs
+                 (eval _ x , xs) ≡ exec _ (comp _ x ss) xs
   testOK = ok
 \end{code}
 
@@ -328,23 +328,14 @@ module Val+Plus where
 
 \begin{code}
  private
-  test-exp-0 : eval _ exp , tt ≡ exec _ (comp _ exp []) tt
+  test-exp-0 : (eval _ exp , tt) ≡ (exec _ (comp _ exp []) tt)
   test-exp-0 = <>
 
-  test-exp-1 : 32 , tt ≡ 32 , tt
+  test-exp-1 : (32 , tt) ≡ (32 , tt)
   test-exp-1 = ok _ exp _ _
 
   test-exp-2 : test-exp-0 ≡ test-exp-1
   test-exp-2 = <>
-\end{code}
-
-** Problem **
-
-Strangely enough, the following gives "stack overflow".
-
-\begin{code}
---  test-exp-3 : eval _ exp , tt ≡ exec _ (comp _ exp []) tt
---  test-exp-3 = ok _ exp _ _
 \end{code}
 
 \begin{code}

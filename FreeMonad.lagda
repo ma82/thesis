@@ -15,8 +15,10 @@ open Manifest lI
 \end{code}
 
 \begin{code}
-_⋆_ : En A I → ★^ I lI → En A I
-F ⋆ X = ε ⟩ (F ⊕ ε ⟩ [ `K ∘ X ])
+infixr 8 _⋆_
+
+_⋆_ : En A I → Pow I lI → En A I
+F ⋆ X = ε ⟩ (F ⊕ ε ⟩ _[_]▻_.[ `K ∘ X ])
 \end{code}
 
 \begin{code}
@@ -27,15 +29,15 @@ F ✶ X = μ (F ⋆ X)
 \end{code}
 
 \begin{code}
-roll : {F : En A I}{X : ★^ I lI} → F alg> F ✶ X
-roll i (t , xs) = ⟨ (inL/ t xs) ⟩
+roll : {F : En A I}{X : Pow I lI} → F alg> F ✶ X
+roll i (t , xs) = ⟨ (inL xs) ⟩
 
-var  : {F : En A I}{X : ★^ I lI} → X ⇛ F ✶ X
-var i v = ⟨ (inR/ _ (v , _)) ⟩
+var  : {F : En A I}{X : Pow I lI} → X ⇛ F ✶ X
+var i v = ⟨ (inR (v , _)) ⟩
 \end{code}
 
 \begin{code}
-module Cata✶ {lY}{F : En A I}{X : ★^ I lI}{Y : ★^ I lY} where
+module Cata✶ {lY}{F : En A I}{X : Pow I lI}{Y : Pow I lY} where
 
  open Cata {F = F ⋆ X}
 \end{code}
@@ -46,7 +48,7 @@ module Cata✶ {lY}{F : En A I}{X : ★^ I lI}{Y : ★^ I lY} where
 \end{code}
 
 \begin{code}
-cata✶⊥ : ∀ {lY}{F : En A I}{Y : ★^ I lY} →
+cata✶⊥ : ∀ {lY}{F : En A I}{Y : Pow I lY} →
          F alg> Y → (F ✶ ⊥/) ⇛ Y
 cata✶⊥ = Cata✶.cata✶ § magic/
 \end{code}
@@ -54,14 +56,14 @@ cata✶⊥ = Cata✶.cata✶ § magic/
 \begin{code}
 open NT+
 
-✶⊥→μ-pt : {F : En A I} → F ⋆ ⊥/ pt> F
+✶⊥→μ-pt : {F : En A I} → (F ⋆ ⊥/) pt> F
 ✶⊥→μ-pt X = [ id⇛ , magic/ ∘⇛ fst/ ∘⇛ snd/ ]⟦⟧
 
 ✶⊥→μ : {F : En A I} → F ✶ ⊥/ ⇛ μ F
 ✶⊥→μ {F} = Mu.μhomap (✶⊥→μ-pt {F = F})
 
-μ→✶⊥-pt : {F : En A I} → F pt> F ⋆ ⊥/
-μ→✶⊥-pt X n (t , xs) = inL/ t xs
+μ→✶⊥-pt : {F : En A I} → F pt> (F ⋆ ⊥/)
+μ→✶⊥-pt X n (t , xs) = inL xs
 
 μ→✶⊥ : {F : En A I} → μ F ⇛ F ✶ ⊥/
 μ→✶⊥ {F} = Mu.μhomap (μ→✶⊥-pt {F = F})
@@ -82,7 +84,7 @@ open IsRawMonad.API ⦃...⦄
 TODO Also treat these generically for indexed monads in AD.Misc (or AD.Monad?)
 
 \begin{code}
-✑ : ∀ F i j (X : ★^ I lI) → ★ lI
+✑ : ∀ F i j (X : Pow I lI) → ★ lI
 ✑ F i j X = F ✶ [ X := j ] $ i
 
 ✑return : ∀ {F A i} → A i → ✑ F i i A
@@ -108,7 +110,7 @@ fmap-alg f = [ roll , var ∘⇛ f ∘⇛ fst/ ∘⇛ snd/ ]⟦⟧
 
 \begin{code}
 module Init✶ (F : En A I)(eF : ∀ {l} → ExtFor/ F l)
-             {X : ★^ I lI}{lY}{Y : ★^ I lY}
+             {X : Pow I lI}{lY}{Y : Pow I lY}
              (α : F alg> Y)(ξ : X ⇛ Y)
              (k : F ✶ X ⇛ Y)
              (hr : α ∘⇛ ⟪ F ⟫map k ⇛≡ k ∘⇛ roll)
@@ -144,23 +146,23 @@ module _ {F G : En A I} where
 \end{code}
 
 \begin{code}
- inj⋆# : ⦃ _ : F <: G ⦄{X : ★^ I lI} → F ⋆ X nt> G ⋆ X
+ inj⋆# : ⦃ _ : F <: G ⦄{X : Pow I lI} → F ⋆ X nt> G ⋆ X
  inj⋆# = nt→nt⋆ inj#
 
- inj⋆ : ⦃ _ : F <: G ⦄{X : ★^ I lI} → F ⋆ X pt> G ⋆ X
+ inj⋆ : ⦃ _ : F <: G ⦄{X : Pow I lI} → F ⋆ X pt> G ⋆ X
  inj⋆ = fst inj⋆#
 
- =>✶ : ⦃ p : F <: G ⦄{X : ★^ I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
+ =>✶ : ⦃ p : F <: G ⦄{X : Pow I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
  =>✶ (t , xs) = ⟨ inj⋆ _ _ (inL/ t xs) ⟩
 \end{code}
 
 \begin{code}
- ✶homap : F pt> G → (X : ★^ I lI) → F ✶ X ⇛ G ✶ X
+ ✶homap : F pt> G → (X : Pow I lI) → F ✶ X ⇛ G ✶ X
  ✶homap f X i xs = Mu.μhomap (pt→pt⋆ f) i xs
 \end{code}
 
 \begin{code}
- =>✶' : ⦃ p : F <: G ⦄{X : ★^ I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
+ =>✶' : ⦃ p : F <: G ⦄{X : Pow I lI}{i : I} → ⟪ F ⟫ (G ✶ X) i → (G ✶ X) i
  =>✶' xs = roll _ (inj _ _ xs)
 \end{code}
 
@@ -173,7 +175,7 @@ module _ {F G : En A I} where
 module ✶homap-nat (F : En A I)⦃ eF : ExtFor/ F lI ⦄
                   (G : En A I)⦃ eG : ExtFor/ G lI ⦄
                   (f# : F nt> G)
-                  {X Y : ★^ I lI}(h : X ⇛ Y) where
+                  {X Y : Pow I lI}(h : X ⇛ Y) where
 
  private
   f = fst f#
@@ -211,7 +213,7 @@ module ✶homap-nat (F : En A I)⦃ eF : ExtFor/ F lI ⦄
  map✶homap-nat (`1    ) _ xs = <>
  map✶homap-nat (L `× R) (eL , eR) (ls , rs) = ap₂ _,_ (map✶homap-nat L eL ls) (map✶homap-nat R eR rs)
 
- map✶homap-nat' i xs = help i _ ⊚ (f _ i $≡ map✶homap-nat (F `$ i) (eF i) xs) where
+ map✶homap-nat' i xs = help i _ ⊚ f _ i $≡ map✶homap-nat (F `$ i) (eF i) xs where
   m  = G★.∣_∣map h where 
   ma = fmap-alg h
   nat : ⟪ G ⟫map m ∘⇛ f _ ⇛≡ f _ ∘⇛ ⟪ F ⟫map m
@@ -219,7 +221,7 @@ module ✶homap-nat (F : En A I)⦃ eF : ExtFor/ F lI ⦄
   help : ∀ i → G✶X.mapCata ma (G `$ i) ∘ f _ i Π≡ f _ i ∘ G✶X.mapCata ma (F `$ i)
   help i xs =   G✶X.mapCata-OK ma (G `$ i) (eG i) _
               ⊚ nat (i , xs)
-              ⊚ f _ i $≡ ! (G✶X.mapCata-OK ma (F `$ i) (eF i) _)
+              ⊚ f _ i $≡ (! G✶X.mapCata-OK ma (F `$ i) (eF i) _)
 \end{code}
 
 \begin{code}

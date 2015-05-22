@@ -23,7 +23,7 @@ In _ = ⟨_⟩
 \end{code}
 
 \begin{code}
-module Cata {F : En I}{lY}{Y : ★^ I lY}(α : F alg> Y) where
+module Cata {F : En I}{lY}{Y : Pow I lY}(α : F alg> Y) where
 \end{code}
 
 \begin{code}
@@ -89,7 +89,7 @@ module Cata {F : En I}{lY}{Y : ★^ I lY}(α : F alg> Y) where
 \end{code}
 
 \begin{code}
-Mot = λ F lP → ★^Σ (μ F) lP
+Mot = λ F lP → Pow/ (μ F) lP
 
 _me>_ : ∀ (F : En I){lP} → Mot F lP → Set (lP ⊔ S lI)
 F me> P = □/ F P ⇛ P ∘ Σ.< fst , ⟨_⟩ ∘ snd >
@@ -152,7 +152,7 @@ module CataAp {F : En I}{lY}(eF : ∀ i → ExtFor (F i) (lI ⊔ lY))
 
 \begin{code}
 module Fusion (F : En I){lY}(eF : ExtFor/ F (lI ⊔ lY))
-              {lX}{X : ★^ I lX}{Y : ★^ I lY}
+              {lX}{X : Pow I lX}{Y : Pow I lY}
               (α : F alg> X)(β : F alg> Y)
               (k : X ⇛ Y)(h : β ∘⇛ ⟪ F ⟫map k ⇛≡ k ∘⇛ α) where
 
@@ -160,8 +160,7 @@ module Fusion (F : En I){lY}(eF : ExtFor/ F (lI ⊔ lY))
 
   mapFusion : (D : _)(eD : ExtFor D (lI ⊔ lY)) →
               ⟦ D ⟧map k ∘ mapCata α D Π≡ mapCata β D
-  mapFusion (`I k)   _   (↑ ⟨ xs ⟩) = ↑_ $≡ (!   (h _)
-                                               ⊚ (β k) $≡ (mapFusion (F k) (eF k) xs))
+  mapFusion (`I k)   _   (↑ ⟨ xs ⟩) = ↑_ $≡ ((! h _) ⊚ (β k) $≡ (mapFusion (F k) (eF k) xs))
   mapFusion (`Σ S T) eT  (s , t)    = ,_ $≡ (mapFusion (T s) (eT s) t)
   mapFusion (`Π S T) e   f          = e λ s → mapFusion (T s) (extFor e (T s)) (f s)
 \end{code}
@@ -174,7 +173,7 @@ module Fusion (F : En I){lY}(eF : ExtFor/ F (lI ⊔ lY))
 
 \begin{code}
   fusion : k ∘⇛ cata α ⇛≡ cata β
-  fusion (i , ⟨ xs ⟩) = ! (h _) ⊚ (β i) $≡ (mapFusion (F i) (eF i) xs)
+  fusion (i , ⟨ xs ⟩) = (! h _) ⊚ (β i) $≡ (mapFusion (F i) (eF i) xs)
 \end{code}
 
 \begin{code}
@@ -202,7 +201,7 @@ module FunctorFusion (F : En I)(eF : ExtFor/ F lI)
 
   mapFFusion (`I k)   _   (↑ ⟨ xs ⟩) = ↑_ $≡
     (α k $≡ (  mapCata-OK α (G k) (eG k) (f _ _ (mapCata _ (F k) xs))
-             ⊚ ! (snd f# (cata α) (k , mapCata _ (F k) xs))
+             ⊚ (! snd f# (cata α) (k , mapCata _ (F k) xs))
              ⊚ (f X k $≡ (mapFFusion (F k) (eF k) xs))))
   mapFFusion (`Σ S T) eT  (s , t)    = ,_ $≡ mapFFusion (T s) (eT s) t
   mapFFusion (`Π S T) e   f          = e λ s → mapFFusion (T s) (extFor e (T s)) (f s)
@@ -213,12 +212,12 @@ module FunctorFusion (F : En I)(eF : ExtFor/ F lI)
   ffusion : cata {F = G} α ∘⇛ μhomap {F = F} f ⇛≡ cata (α ∘⇛ f _)
   ffusion (i , ⟨ xs ⟩) =
     α i $≡ (  mapCata-OK α (G i) (eG i) (f _ _ (mapCata _ (F i) xs))
-            ⊚ ! (snd f# (cata α) (i , mapCata _ (F i) xs))
+            ⊚ (! snd f# (cata α) (i , mapCata _ (F i) xs))
             ⊚ f X i $≡ mapFFusion (F i) (eF i) xs)
 \end{code}
 
 \begin{code}
-module _ {F : En I}{lY}{Y : ★^ I lY} where
+module _ {F : En I}{lY}{Y : Pow I lY} where
 \end{code}
 
 \begin{code}
@@ -232,26 +231,26 @@ module _ {F : En I}{lY}{Y : ★^ I lY} where
 \end{code}
 
 \begin{code}
-_,_hpara>_ : ∀ (F H : En I){lY} → ★^ I lY → Set _
+_,_hpara>_ : ∀ (F H : En I){lY} → Pow I lY → Set _
 F , H hpara> Y = ⟪ F ⟫ (μ H ×/ Y) ⇛ Y
 
-_para>_ : ∀ (F : En I){lY} → ★^ I lY → Set _
+_para>_ : ∀ (F : En I){lY} → Pow I lY → Set _
 F para> Y = F , F hpara> Y
 \end{code}
 
 \begin{code}
-_,_hnme>_ : ∀ (F H : En I){lY} → ★^ I lY → Set _
+_,_hnme>_ : ∀ (F H : En I){lY} → Pow I lY → Set _
 F , H hnme> Y = □/ {X = μ H} F (Y ∘ fst) ⇛ Y ∘ fst
 
-_nme>_ : ∀ (F : En I){lY} → ★^ I lY → Set _
+_nme>_ : ∀ (F : En I){lY} → Pow I lY → Set _
 F nme> Y = F , F hnme> Y
 
-private test : ∀ {F lY}{Y : ★^ I lY} → F nme> Y ≡ F me> (Y ∘ fst)
+private test : ∀ {F lY}{Y : Pow I lY} → (F nme> Y) ≡ (F me> (Y ∘ fst))
         test = <>
 \end{code}
 
 \begin{code}
-module hpara↔hnme {lY}{Y : ★^ I lY}(F H : En I) where
+module hpara↔hnme {lY}{Y : Pow I lY}(F H : En I) where
 
   module M = IH {X = μ H} (Y ∘ fst)
 
@@ -267,7 +266,7 @@ module para↔nme {lY}{Y} F = hpara↔hnme {lY}{Y} F F
 \end{code}
 
 \begin{code}
-module Para {F : En I}{lY}{Y : ★^ I lY}(α : F para> Y) where
+module Para {F : En I}{lY}{Y : Pow I lY}(α : F para> Y) where
 
  para : μ F ⇛ Y
  para = cu (Elim.elim F _ (para↔nme.to F α))

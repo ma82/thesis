@@ -19,11 +19,11 @@ infixr 1 _⊢_↓_
 \end{code}
 
 \begin{code}
-_⊢_↓_ = λ {A I : Set}(F : En A I)(s : I)(X : ★^ I _) → F ✶ X $ s
+_⊢_↓_ = λ {A I : Set}(F : En A I)(s : I)(X : Pow I _) → F ✶ X $ s
 \end{code}
 
 \begin{code}
-[[_]] : {I : Set} → Set → ★^ I _
+[[_]] : {I : Set} → Set → Pow I _
 [[ X ]] _ = X
 \end{code}
 
@@ -69,10 +69,10 @@ module Teletype {A : Set}(`TT `getChar `putChar : A)(I : Set) where
 \end{code}
 
 \begin{code}
- getChar : ∀ {F} → ⦃ _ : ||| GetCharF <: F ⦄ → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ Char ]])
+ getChar : ∀ {F} → ⦃ _ : ||| GetCharF <: F ⦄ → ∀ {i} → F ⊢ i ↓ ≡ i ×/ [[ Char ]]
  getChar = =>✶ ⦃ km-<: ⦄ (_ , λ c → ↑return (<> , c))
 
- putChar : ∀ {F} → ⦃ _ : ||| PutCharF <: F ⦄ → Char → ∀ {i} → F ⊢ i ↓ (≡ i ×/ [[ ⊤ ]])
+ putChar : ∀ {F} → ⦃ _ : ||| PutCharF <: F ⦄ → Char → ∀ {i} → F ⊢ i ↓ ≡ i ×/ [[ ⊤ ]]
  putChar c = =>✶ ⦃ km-<: ⦄ (_ , c , ↑return (<> , _))
 
  evalAlg : {A : I → Set} → TeletypeF alg> IO ∘ A
